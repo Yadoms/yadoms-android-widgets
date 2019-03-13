@@ -1,0 +1,63 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:7043153906492445991",
+      "lastPropertyId": "4:300288741772800025",
+      "name": "Authentication",
+      "properties": [
+        {
+          "id": "1:7921699919285086483",
+          "name": "id"
+        },
+        {
+          "id": "2:2682027784049365670",
+          "name": "basicAuthenticationUsername"
+        },
+        {
+          "id": "3:1211651719317994359",
+          "name": "basicAuthenticationPassword"
+        },
+        {
+          "id": "4:300288741772800025",
+          "name": "type"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:776883660497860296",
+      "lastPropertyId": "3:1143415638424857686",
+      "name": "yadomsServer",
+      "properties": [
+        {
+          "id": "1:8975962145618632915",
+          "name": "id"
+        },
+        {
+          "id": "2:7141822499363358628",
+          "name": "address"
+        },
+        {
+          "id": "3:1143415638424857686",
+          "indexId": "1:5966018608308676279",
+          "name": "authenticationId"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:776883660497860296",
+  "lastIndexId": "1:5966018608308676279",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 4,
+  "modelVersionParserMinimum": 4,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

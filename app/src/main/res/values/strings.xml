@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">State display</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure switch widget</string>
+    <string name="add_widget">Add widget</string>
+    <string name="yadoms_server_address">Your Yadoms server address</string>
+    <string name="yadoms_server_login">Login</string>
+    <string name="yadoms_server_password">Password</string>
+    <string name="keyword">Keyword ID</string>
+    <string name="push">Push</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_server_connection">Server connection</string>
+
+    <string name="basic_authentication">Use basic authentication</string>
+    <string name="basic_authentication_summary">Check it if your server uses basic authentication</string>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value"/>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="settings">Settings</string>
+    <string name="server_url">Server address</string>
+    <string name="server_port">Port TCP</string>
+    <string name="basic_authentication_username">Username</string>
+    <string name="basic_authentication_password">Password</string>
+</resources>

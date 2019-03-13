@@ -1,0 +1,20 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="com.yadoms.widgets.statedisplay.SettingsActivity$ServerConnectionPreferenceFragment"
+        android:icon="@drawable/ic_compare_arrows_black_24dp"
+        android:title="@string/pref_server_connection"/>
+
+    <header
+        android:fragment="com.yadoms.widgets.statedisplay.SettingsActivity$NotificationPreferenceFragment"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="@string/pref_header_notifications"/>
+
+    <header
+        android:fragment="com.yadoms.widgets.statedisplay.SettingsActivity$DataSyncPreferenceFragment"
+        android:icon="@drawable/ic_sync_black_24dp"
+        android:title="@string/pref_header_data_sync"/>
+
+</preference-headers>
