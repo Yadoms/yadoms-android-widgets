@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">State display</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="appwidget_default_text">Unknown</string>
     <string name="configure">Configure switch widget</string>
     <string name="add_widget">Add widget</string>
     <string name="yadoms_server_address">Your Yadoms server address</string>
@@ -69,4 +69,7 @@
     <string name="server_port">Port TCP</string>
     <string name="basic_authentication_username">Username</string>
     <string name="basic_authentication_password">Password</string>
+    <string name="unauthorized">Unauthorized, check authentication settings</string>
+    <string name="url_not_found">Can\'t join server, check connection settings</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

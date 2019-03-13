@@ -11,6 +11,7 @@ class widgetPref
     private final Context context;
     private final int appWidgetId;
 
+    // TODO faire le ménage, la plupart des données ne sont pas des données du widget
     String yadomsServerAddress;
     String yadomsServerPort;
     boolean yadomsBasicAuthenticationEnable;

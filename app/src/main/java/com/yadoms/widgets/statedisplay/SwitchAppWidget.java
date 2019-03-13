@@ -8,14 +8,14 @@ import android.content.Intent;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
  */
 public class SwitchAppWidget
-        extends AppWidgetProvider
-{
+        extends AppWidgetProvider {
     public static String CLICK_ON_WIDGET_ACTION = "ClickOnWidgetAction";
     public static String WIDGET_ACTION_WIDGET_ID = "WidgetId";
 
@@ -23,13 +23,15 @@ public class SwitchAppWidget
 
     static void updateAppWidget(Context context,
                                 AppWidgetManager appWidgetManager,
-                                int appWidgetId)
-    {
+                                int appWidgetId) {
         widgetPref prefs = new widgetPref(context, appWidgetId);
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
         views.setTextViewText(R.id.appwidget_label, prefs.keyword);
+
+        views.setImageViewResource(R.id.appwidget_image, currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
+
         Log.d("updateAppWidget", "prefs.keyword = " + prefs.keyword);
 
         Intent intent = new Intent(context, SwitchAppWidget.class);
@@ -44,59 +46,46 @@ public class SwitchAppWidget
 
     @Override
     public void onReceive(Context context,
-                          Intent intent)
-    {
+                          Intent intent) {
         super.onReceive(context, intent);
 
-        if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION))
-        {
+        if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION)) {
             int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
             currentState.put(widgetId, !(currentState.get(widgetId)));
-            sendEventToYadoms(new widgetPref(context, widgetId),
-                              currentState.get(widgetId));
+            restService.sendYadomsRequest(context,
+                    new widgetPref(context, widgetId).keyword,
+                    currentState.get(widgetId));
         }
     }
 
     @Override
     public void onUpdate(Context context,
                          AppWidgetManager appWidgetManager,
-                         int[] appWidgetIds)
-    {
+                         int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds)
-        {
+        for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
     @Override
     public void onDeleted(Context context,
-                          int[] appWidgetIds)
-    {
+                          int[] appWidgetIds) {
         // When the user deletes the widget, delete the preference associated with it.
-        for (int appWidgetId : appWidgetIds)
-        {
+        for (int appWidgetId : appWidgetIds) {
             widgetPref prefs = new widgetPref(context, appWidgetId);
             prefs.delete();
         }
     }
 
     @Override
-    public void onEnabled(Context context)
-    {
+    public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
     }
 
     @Override
-    public void onDisabled(Context context)
-    {
+    public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
-    }
-
-    private void sendEventToYadoms(widgetPref prefs,
-                                   boolean currentState)
-    {
-        new Thread(new yadomsRequest(prefs, currentState)).start();
     }
 }
 

@@ -20,4 +20,16 @@ public class MainActivity
     {
         startActivity(new Intent(this, SettingsActivity.class));
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+    }
 }
