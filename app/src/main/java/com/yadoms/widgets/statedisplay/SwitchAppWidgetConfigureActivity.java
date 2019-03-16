@@ -30,10 +30,12 @@ public class SwitchAppWidgetConfigureActivity
             Log.d("onClick", "mAppWidgetId = " + mAppWidgetId);
             widgetPref prefs = new widgetPref(context, mAppWidgetId);
             prefs.keyword = viewHolder.keywordEditText.getText().toString();
+            prefs.label = viewHolder.labelEditText.getText().toString();
             prefs.save();
 
             prefs = new widgetPref(context, mAppWidgetId);
             Log.d("onClick", "prefs.keyword = " + prefs.keyword);
+            Log.d("onClick", "prefs.label = " + prefs.label);
 
 
             // It is the responsibility of the configuration activity to update the app widget
@@ -82,6 +84,7 @@ public class SwitchAppWidgetConfigureActivity
 
         viewHolder = new ViewHolder();
         viewHolder.keywordEditText = findViewById(R.id.keyword);
+        viewHolder.labelEditText = findViewById(R.id.label);
 
         viewHolder.submitButton = findViewById(R.id.button);
         viewHolder.submitButton.setOnClickListener(onSubmitButtonClick);
@@ -90,6 +93,7 @@ public class SwitchAppWidgetConfigureActivity
     protected class ViewHolder
     {
         EditText keywordEditText;
+        EditText labelEditText;
         Button submitButton;
     }
 }
