@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">State display</string>
+    <string name="app_name">Yadroid</string>
     <string name="appwidget_default_text">Unknown</string>
     <string name="configure">Configure switch widget</string>
     <string name="add_widget">Add widget</string>
