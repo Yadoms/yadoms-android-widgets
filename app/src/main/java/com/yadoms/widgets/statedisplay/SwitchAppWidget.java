@@ -35,7 +35,7 @@ public class SwitchAppWidget
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
-        views.setTextViewText(R.id.appwidget_label, prefs.keyword);
+        views.setTextViewText(R.id.appwidget_label, !prefs.label.isEmpty() ? prefs.label : prefs.keyword);
 
         views.setImageViewResource(R.id.appwidget_image,
                                    currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
