@@ -276,7 +276,7 @@ public class SettingsActivity
                                                                                findPreference(
                                                                                        "basic_authentication_username"),
                                                                                findPreference(
-                                                                                       "basic_authentication_password")
+                                                                                       "basic_authentication_password")//TODO à chiffrer
                                                                        });
         }
 

@@ -23,6 +23,7 @@ import java.net.URL;
  * <p>
  * helper methods.
  */
+//TODO virer ?
 public class restService extends IntentService {
     private static final String ACTION_YADOMS_REQUEST = "com.yadoms.widgets.statedisplay.action.yadomsRequest";
 
