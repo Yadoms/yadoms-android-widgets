@@ -10,12 +10,21 @@ import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+
+import cz.msebera.android.httpclient.Header;
+
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
  */
 public class SwitchAppWidget
-        extends AppWidgetProvider {
+        extends AppWidgetProvider
+{
     public static String CLICK_ON_WIDGET_ACTION = "ClickOnWidgetAction";
     public static String WIDGET_ACTION_WIDGET_ID = "WidgetId";
 
@@ -23,14 +32,17 @@ public class SwitchAppWidget
 
     static void updateAppWidget(Context context,
                                 AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+                                int appWidgetId)
+    {
         widgetPref prefs = new widgetPref(context, appWidgetId);
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
-        views.setTextViewText(R.id.appwidget_label, prefs.keyword);
+        views.setTextViewText(R.id.appwidget_label,
+                              (prefs.label != null && !prefs.label.isEmpty()) ? prefs.label : prefs.keyword);
 
-        views.setImageViewResource(R.id.appwidget_image, currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
+        views.setImageViewResource(R.id.appwidget_image,
+                                   currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
 
         Log.d("updateAppWidget", "prefs.keyword = " + prefs.keyword);
 
@@ -45,46 +57,98 @@ public class SwitchAppWidget
     }
 
     @Override
-    public void onReceive(Context context,
-                          Intent intent) {
+    public void onReceive(final Context context,
+                          Intent intent)
+    {
         super.onReceive(context, intent);
 
-        if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION)) {
-            int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
+        if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION))
+        {
+            final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
             currentState.put(widgetId, !(currentState.get(widgetId)));
-            restService.sendYadomsRequest(context,
-                    new widgetPref(context, widgetId).keyword,
-                    currentState.get(widgetId));
+
+            YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
+            yadomsRestClient.post("/rest/device/keyword/" + new widgetPref(context,
+                                                                           widgetId).keyword.trim() + "/command",
+                                  currentState.get(widgetId)? "1" : "0",
+                                  new JsonHttpResponseHandler()
+                                  {
+                                      @Override
+                                      public void onSuccess(int statusCode,
+                                                            Header[] headers,
+                                                            JSONObject response)
+                                      {
+                                          Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                                          onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+                                      }
+
+                                      @Override
+                                      public void onFailure(int statusCode,
+                                                            Header[] headers,
+                                                            Throwable error,
+                                                            JSONObject errorResponse)
+                                      {
+                                          Log.e("yadomsRestClient",
+                                                "onFailure, statusCode = " + statusCode + ", " + error);
+
+                                          switch (statusCode)
+                                          {
+                                              case HttpURLConnection.HTTP_UNAUTHORIZED:
+                                              case HttpURLConnection.HTTP_FORBIDDEN:
+                                                  Toast.makeText(context,
+                                                                 context.getString(R.string.unauthorized),
+                                                                 Toast.LENGTH_LONG).show();
+                                                  break;
+                                              case HttpURLConnection.HTTP_NOT_FOUND:
+                                              case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
+                                                  Toast.makeText(context,
+                                                                 context.getString(R.string.url_not_found),
+                                                                 Toast.LENGTH_LONG).show();
+                                                  break;
+                                              default:
+                                                  Toast.makeText(context,
+                                                                 context.getString(R.string.unknown_error),
+                                                                 Toast.LENGTH_LONG).show();
+                                                  break;
+                                          }
+                                      }
+                                  });
         }
     }
 
     @Override
     public void onUpdate(Context context,
                          AppWidgetManager appWidgetManager,
-                         int[] appWidgetIds) {
+                         int[] appWidgetIds)
+    {
         // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds) {
+        for (int appWidgetId : appWidgetIds)
+        {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
     @Override
     public void onDeleted(Context context,
-                          int[] appWidgetIds) {
+                          int[] appWidgetIds)
+    {
         // When the user deletes the widget, delete the preference associated with it.
-        for (int appWidgetId : appWidgetIds) {
+        for (int appWidgetId : appWidgetIds)
+        {
             widgetPref prefs = new widgetPref(context, appWidgetId);
             prefs.delete();
         }
     }
 
     @Override
-    public void onEnabled(Context context) {
+    public void onEnabled(Context context)
+    {
         // Enter relevant functionality for when the first widget is created
     }
 
     @Override
-    public void onDisabled(Context context) {
+    public void onDisabled(Context context)
+    {
         // Enter relevant functionality for when the last widget is disabled
     }
 }

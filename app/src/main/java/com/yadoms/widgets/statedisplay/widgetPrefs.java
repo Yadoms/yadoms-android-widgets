@@ -11,13 +11,8 @@ class widgetPref
     private final Context context;
     private final int appWidgetId;
 
-    // TODO faire le ménage, la plupart des données ne sont pas des données du widget
-    String yadomsServerAddress;
-    String yadomsServerPort;
-    boolean yadomsBasicAuthenticationEnable;
-    String basicAuthenticationUsername;
-    String basicAuthenticationPassword;
     String keyword;
+    String label;
 
     widgetPref(Context context,
                int appWidgetId)
@@ -30,18 +25,15 @@ class widgetPref
     private void load()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        yadomsServerAddress = prefs.getString("server_url", null);
-        yadomsServerPort = prefs.getString("server_port", "8080");
-        yadomsBasicAuthenticationEnable = prefs.getBoolean("basic_authentication", false);
-        basicAuthenticationUsername = prefs.getString("basic_authentication_username", null);
-        basicAuthenticationPassword = prefs.getString("basic_authentication_password", null);
         keyword = prefs.getString(PREF_PREFIX_KEY + appWidgetId + "keyword", null);
+        label = prefs.getString(PREF_PREFIX_KEY + appWidgetId + "label", null);
     }
 
     void save()
     {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
         prefs.putString(PREF_PREFIX_KEY + appWidgetId + "keyword", keyword);
+        prefs.putString(PREF_PREFIX_KEY + appWidgetId + "label", label);
         prefs.apply();
     }
 
@@ -49,6 +41,7 @@ class widgetPref
     {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
         prefs.remove(PREF_PREFIX_KEY + appWidgetId + "keyword");
+        prefs.remove(PREF_PREFIX_KEY + appWidgetId + "label");
         prefs.apply();
     }
 }
