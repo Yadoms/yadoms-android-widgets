@@ -7,11 +7,14 @@ import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
+
+import cz.msebera.android.httpclient.entity.ContentType;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class YadomsRestClient
 {
     private final String baseUrl;
+    private final Context applicationContext;
 
     YadomsRestClient(Context applicationContext)
     {
@@ -26,25 +29,36 @@ public class YadomsRestClient
         String basicAuthenticationPassword = prefs.getString("basic_authentication_password", null);
 
         if (yadomsBasicAuthenticationEnable)
+        {
             client.setBasicAuth(basicAuthenticationUsername, basicAuthenticationPassword);
+        }
+        this.applicationContext = applicationContext;
     }
 
     private AsyncHttpClient client = new AsyncHttpClient();
 
     public void get(String url,
-                    RequestParams params,
+                    String params,
                     AsyncHttpResponseHandler responseHandler)
     {
-        Log.d("YadomsRestClient", "GET : " + url + ", params : " + params.toString());
-        client.get(getAbsoluteUrl(url), params, responseHandler);
+        Log.d("YadomsRestClient", "GET : " + url + ", params : " + (params != null ? params : ""));
+        client.get(applicationContext,
+                   getAbsoluteUrl(url),
+                   new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
+                   "application/json;charset=UTF-8",
+                   responseHandler);
     }
 
     public void post(String url,
-                     RequestParams params,
+                     String params,
                      AsyncHttpResponseHandler responseHandler)
     {
-        Log.d("YadomsRestClient", "POST : " + url + ", params : " + params.toString());
-        client.post(getAbsoluteUrl(url), params, responseHandler);
+        Log.d("YadomsRestClient", "POST : " + url + ", params : " + (params != null ? params : ""));
+        client.post(applicationContext,
+                    getAbsoluteUrl(url),
+                    new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
+                    "application/json;charset=UTF-8",
+                    responseHandler);
     }
 
     private String getAbsoluteUrl(String relativeUrl)
@@ -53,26 +67,3 @@ public class YadomsRestClient
     }
 }
 
-class SingleStringRequestParam //TODO déplacer ?
-        extends RequestParams
-{
-    private final String value;
-
-    SingleStringRequestParam(String value)
-    {
-        super();
-        this.value = value;
-    }
-
-    SingleStringRequestParam(boolean value)
-    {
-        super();
-        this.value = value ? "1" : "0";
-    }
-
-    @Override
-    public String toString()
-    {
-        return value;
-    }
-}
