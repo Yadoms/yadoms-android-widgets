@@ -6,7 +6,6 @@
     <string name="yadoms_server_address">Your Yadoms server address</string>
     <string name="yadoms_server_login">Login</string>
     <string name="yadoms_server_password">Password</string>
-    <string name="keyword">Keyword ID</string>
     <string name="push">Push</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -73,4 +72,6 @@
     <string name="url_not_found">Can\'t join server, check connection settings</string>
     <string name="unknown_error">Unknown error</string>
     <string name="label">Label</string>
+    <string name="selectDevice">Select a device</string>
+    <string name="selectKeyword">Select keyword</string>
 </resources>

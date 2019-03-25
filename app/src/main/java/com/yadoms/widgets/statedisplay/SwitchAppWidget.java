@@ -62,7 +62,7 @@ public class SwitchAppWidget
             yadomsRestClient.command(new widgetPref(context,
                     widgetId).keyword,
                     currentState.get(widgetId),
-                    new YadomsRestResponseHandler(){
+                    new YadomsRestCommandResponseHandler(){
                 @Override
                 public void onSuccess()
                 {

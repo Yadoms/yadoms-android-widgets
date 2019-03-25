@@ -7,8 +7,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 /**
  * The configuration screen for the {@link SwitchAppWidget SwitchAppWidget} AppWidget.
@@ -17,6 +20,7 @@ public class SwitchAppWidgetConfigureActivity
         extends Activity
 {
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    private Keyword selectedKeyword;
 
     ViewHolder viewHolder;
 
@@ -29,7 +33,7 @@ public class SwitchAppWidgetConfigureActivity
             // Save prefs
             Log.d("onClick", "mAppWidgetId = " + mAppWidgetId);
             widgetPref prefs = new widgetPref(context, mAppWidgetId);
-            prefs.keyword = Integer.parseInt(viewHolder.keywordEditText.getText().toString());
+            prefs.keyword = selectedKeyword.getId();
             prefs.label = viewHolder.labelEditText.getText().toString();
             prefs.save();
 
@@ -81,18 +85,66 @@ public class SwitchAppWidgetConfigureActivity
             finish();
         }
 
-
         viewHolder = new ViewHolder();
-        viewHolder.keywordEditText = findViewById(R.id.keyword);
+        viewHolder.deviceSelectionSpinner = findViewById(R.id.deviceSelectionSpinner);
+        viewHolder.keywordSelectionSpinner = findViewById(R.id.keywordSelectionSpinner);
         viewHolder.labelEditText = findViewById(R.id.label);
 
         viewHolder.submitButton = findViewById(R.id.button);
         viewHolder.submitButton.setOnClickListener(onSubmitButtonClick);
+        viewHolder.submitButton.setEnabled(false);
+
+        final YadomsRestClient client = new YadomsRestClient(getApplicationContext());
+        client.getAllDevices(new YadomsRestGetResponseHandler()//TODO filtrer pour ne garder que les getSet
+        {
+            @Override
+            void onSuccess(Object[] objects)
+            {
+                final Device[] devices = (Device[]) objects;
+                ArrayAdapter<Device> aa = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, devices);
+                aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                viewHolder.deviceSelectionSpinner.setAdapter(aa);
+                viewHolder.deviceSelectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        client.getDeviceKeywords(devices[i].getId(),
+                                new YadomsRestGetResponseHandler()//TODO filtrer pour ne garder que les getSet
+                        {
+                            @Override
+                            void onSuccess(Object[] objects) {
+                                final Keyword[] keywords = (Keyword[]) objects;
+                                ArrayAdapter<Keyword> aa = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, keywords);
+                                aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                viewHolder.keywordSelectionSpinner.setAdapter(aa);
+                                viewHolder.keywordSelectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                    @Override
+                                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                        Log.d("KeywordSelected", "keyword Id=" + keywords[i].getId() + " " + keywords[i].getFriendlyName());
+                                        selectedKeyword = keywords[i];
+                                        viewHolder.submitButton.setEnabled(true);
+                                    }
+                                    @Override
+                                    public void onNothingSelected(AdapterView<?> adapterView) {
+                                        selectedKeyword = null;
+                                        viewHolder.submitButton.setEnabled(false);
+                                    }});
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                        viewHolder.submitButton.setEnabled(false);
+                    }
+                });
+            }
+        });
     }
 
     protected class ViewHolder
     {
-        EditText keywordEditText;
+        Spinner deviceSelectionSpinner;
+        Spinner keywordSelectionSpinner;
         EditText labelEditText;
         Button submitButton;
     }
