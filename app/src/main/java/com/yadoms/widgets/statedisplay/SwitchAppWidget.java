@@ -8,15 +8,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
-import android.widget.Toast;
-
-import com.loopj.android.http.JsonHttpResponseHandler;
-
-import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
-
-import cz.msebera.android.httpclient.Header;
 
 /**
  * Implementation of App Widget functionality.
@@ -39,7 +30,7 @@ public class SwitchAppWidget
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
         views.setTextViewText(R.id.appwidget_label,
-                              (prefs.label != null && !prefs.label.isEmpty()) ? prefs.label : prefs.keyword);
+                              (prefs.label != null && !prefs.label.isEmpty()) ? prefs.label : prefs.keyword.toString());
 
         views.setImageViewResource(R.id.appwidget_image,
                                    currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
@@ -68,51 +59,16 @@ public class SwitchAppWidget
             currentState.put(widgetId, !(currentState.get(widgetId)));
 
             YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
-            yadomsRestClient.post("/rest/device/keyword/" + new widgetPref(context,
-                                                                           widgetId).keyword.trim() + "/command",
-                                  currentState.get(widgetId)? "1" : "0",
-                                  new JsonHttpResponseHandler()
-                                  {
-                                      @Override
-                                      public void onSuccess(int statusCode,
-                                                            Header[] headers,
-                                                            JSONObject response)
-                                      {
-                                          Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
-                                          onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
-                                      }
-
-                                      @Override
-                                      public void onFailure(int statusCode,
-                                                            Header[] headers,
-                                                            Throwable error,
-                                                            JSONObject errorResponse)
-                                      {
-                                          Log.e("yadomsRestClient",
-                                                "onFailure, statusCode = " + statusCode + ", " + error);
-
-                                          switch (statusCode)
-                                          {
-                                              case HttpURLConnection.HTTP_UNAUTHORIZED:
-                                              case HttpURLConnection.HTTP_FORBIDDEN:
-                                                  Toast.makeText(context,
-                                                                 context.getString(R.string.unauthorized),
-                                                                 Toast.LENGTH_LONG).show();
-                                                  break;
-                                              case HttpURLConnection.HTTP_NOT_FOUND:
-                                              case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
-                                                  Toast.makeText(context,
-                                                                 context.getString(R.string.url_not_found),
-                                                                 Toast.LENGTH_LONG).show();
-                                                  break;
-                                              default:
-                                                  Toast.makeText(context,
-                                                                 context.getString(R.string.unknown_error),
-                                                                 Toast.LENGTH_LONG).show();
-                                                  break;
-                                          }
-                                      }
-                                  });
+            yadomsRestClient.command(new widgetPref(context,
+                    widgetId).keyword,
+                    currentState.get(widgetId),
+                    new YadomsRestResponseHandler(){
+                @Override
+                public void onSuccess()
+                {
+                    onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+                }
+                    });
         }
     }
 

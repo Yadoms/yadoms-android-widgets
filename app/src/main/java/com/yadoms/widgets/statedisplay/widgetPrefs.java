@@ -11,7 +11,7 @@ class widgetPref
     private final Context context;
     private final int appWidgetId;
 
-    String keyword;
+    Integer keyword;
     String label;
 
     widgetPref(Context context,
@@ -25,14 +25,14 @@ class widgetPref
     private void load()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        keyword = prefs.getString(PREF_PREFIX_KEY + appWidgetId + "keyword", null);
+        keyword = prefs.getInt(PREF_PREFIX_KEY + appWidgetId + "keyword", 0);
         label = prefs.getString(PREF_PREFIX_KEY + appWidgetId + "label", null);
     }
 
     void save()
     {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId + "keyword", keyword);
+        prefs.putInt(PREF_PREFIX_KEY + appWidgetId + "keyword", keyword);
         prefs.putString(PREF_PREFIX_KEY + appWidgetId + "label", label);
         prefs.apply();
     }
