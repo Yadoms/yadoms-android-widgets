@@ -47,8 +47,8 @@ public class YadomsRestClient
     private AsyncHttpClient client = new AsyncHttpClient();
 
     private void get(String url,
-                    String params,
-                    AsyncHttpResponseHandler responseHandler)
+                     String params,
+                     AsyncHttpResponseHandler responseHandler)
     {
         Log.d("YadomsRestClient", "GET : " + url + ", params : " + (params != null ? params : ""));
         client.get(context,
@@ -59,8 +59,8 @@ public class YadomsRestClient
     }
 
     private void post(String url,
-                     String params,
-                     AsyncHttpResponseHandler responseHandler)
+                      String params,
+                      AsyncHttpResponseHandler responseHandler)
     {
         Log.d("YadomsRestClient", "POST : " + url + ", params : " + (params != null ? params : ""));
         client.post(context,
@@ -70,28 +70,30 @@ public class YadomsRestClient
                     responseHandler);
     }
 
-    private void processHttpFailure(int statusCode, Throwable error) {
+    private void processHttpFailure(int statusCode,
+                                    Throwable error)
+    {
         Log.e("yadomsRestClient",
-                "onFailure, statusCode = " + statusCode + ", " + error);
+              "onFailure, statusCode = " + statusCode + ", " + error);
 
         switch (statusCode)
         {
             case HttpURLConnection.HTTP_UNAUTHORIZED:
             case HttpURLConnection.HTTP_FORBIDDEN:
                 Toast.makeText(context,
-                        context.getString(R.string.unauthorized),
-                        Toast.LENGTH_LONG).show();
+                               context.getString(R.string.unauthorized),
+                               Toast.LENGTH_LONG).show();
                 break;
             case HttpURLConnection.HTTP_NOT_FOUND:
             case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
                 Toast.makeText(context,
-                        context.getString(R.string.url_not_found),
-                        Toast.LENGTH_LONG).show();
+                               context.getString(R.string.url_not_found),
+                               Toast.LENGTH_LONG).show();
                 break;
             default:
                 Toast.makeText(context,
-                        error.getLocalizedMessage(),
-                        Toast.LENGTH_LONG).show();
+                               error.getLocalizedMessage(),
+                               Toast.LENGTH_LONG).show();
                 break;
         }
     }
@@ -99,88 +101,148 @@ public class YadomsRestClient
     void getAllDevices(final YadomsRestGetResponseHandler responseHandler)
     {
         get("/rest/device",
-                "",
-                new JsonHttpResponseHandler()
+            "",
+            new JsonHttpResponseHandler()
+            {
+                @Override
+                public void onSuccess(int statusCode,
+                                      Header[] headers,
+                                      JSONObject response)
                 {
-                    @Override
-                    public void onSuccess(int statusCode,
-                                          Header[] headers,
-                                          JSONObject response)
+                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                    try
                     {
-                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
-                        try {
-                            if (!response.getString("result").equals("true"))
-                                throw new RuntimeException("Yadoms returned error");
-
-                            JSONArray devicesArray = response.getJSONObject("data").getJSONArray("device");
-                            Device devices[] = new Device[devicesArray.length()];
-                            for (int jsonIndex = 0; jsonIndex<devicesArray.length() ;++jsonIndex)
-                            {
-                                JSONObject json = devicesArray.getJSONObject(jsonIndex);
-                                devices[jsonIndex] = new Device(json);
-                            }
-                            responseHandler.onSuccess(devices);
-                        } catch (JSONException e) {
-                            Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
-                            responseHandler.onFailure();
+                        if (!response.getString("result").equals("true"))
+                        {
+                            throw new RuntimeException("Yadoms returned error");
                         }
-                    }
 
-                    @Override
-                    public void onFailure(int statusCode,
-                                          Header[] headers,
-                                          Throwable error,
-                                          JSONObject errorResponse)
+                        JSONArray devicesArray = response.getJSONObject("data").getJSONArray("device");
+                        Device devices[] = new Device[devicesArray.length()];
+                        for (int jsonIndex = 0; jsonIndex < devicesArray.length(); ++jsonIndex)
+                        {
+                            JSONObject json = devicesArray.getJSONObject(jsonIndex);
+                            devices[jsonIndex] = new Device(json);
+                        }
+                        responseHandler.onSuccess(devices);
+                    }
+                    catch (JSONException e)
                     {
-                        processHttpFailure(statusCode,
-                                error);
+                        Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
                         responseHandler.onFailure();
                     }
-                });
+                }
+
+                @Override
+                public void onFailure(int statusCode,
+                                      Header[] headers,
+                                      Throwable error,
+                                      JSONObject errorResponse)
+                {
+                    processHttpFailure(statusCode,
+                                       error);
+                    responseHandler.onFailure();
+                }
+            });
+    }
+
+    void getDevicesWithCapacity(EKeywordAccessMode keywordAccessMode,
+                                String capacityName,
+                                final YadomsRestGetResponseHandler responseHandler)
+    {
+        get("/rest/device/matchcapacity/" + keywordAccessMode + "/" + capacityName,
+            "",
+            new JsonHttpResponseHandler()
+            {
+                @Override
+                public void onSuccess(int statusCode,
+                                      Header[] headers,
+                                      JSONObject response)
+                {
+                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                    try
+                    {
+                        if (!response.getString("result").equals("true"))
+                        {
+                            throw new RuntimeException("Yadoms returned error");
+                        }
+
+                        JSONArray devicesArray = response.getJSONObject("data").getJSONArray("device");
+                        Device devices[] = new Device[devicesArray.length()];
+                        for (int jsonIndex = 0; jsonIndex < devicesArray.length(); ++jsonIndex)
+                        {
+                            JSONObject json = devicesArray.getJSONObject(jsonIndex);
+                            devices[jsonIndex] = new Device(json);
+                        }
+                        responseHandler.onSuccess(devices);
+                    }
+                    catch (JSONException e)
+                    {
+                        Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
+                        responseHandler.onFailure();
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode,
+                                      Header[] headers,
+                                      Throwable error,
+                                      JSONObject errorResponse)
+                {
+                    processHttpFailure(statusCode,
+                                       error);
+                    responseHandler.onFailure();
+                }
+            });
     }
 
     void getDeviceKeywords(int deviceId,
                            final YadomsRestGetResponseHandler responseHandler)
     {
         get("/rest/device/" + deviceId + "/keyword",
-                "",
-                new JsonHttpResponseHandler()
+            "",
+            new JsonHttpResponseHandler()
+            {
+                @Override
+                public void onSuccess(int statusCode,
+                                      Header[] headers,
+                                      JSONObject response)
                 {
-                    @Override
-                    public void onSuccess(int statusCode,
-                                          Header[] headers,
-                                          JSONObject response)
+                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                    try
                     {
-                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
-                        try {
-                            if (!response.getString("result").equals("true"))
-                                throw new RuntimeException("Yadoms returned error");
-
-                            JSONArray keywordArray = response.getJSONObject("data").getJSONArray("keyword");
-                            Keyword keywords[] = new Keyword[keywordArray.length()];
-                            for (int jsonIndex = 0; jsonIndex<keywordArray.length() ;++jsonIndex)
-                            {
-                                JSONObject json = keywordArray.getJSONObject(jsonIndex);
-                                keywords[jsonIndex] = new Keyword(json);
-                            }
-                            responseHandler.onSuccess(keywords);
-                        } catch (JSONException e) {
-                            Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
-                            responseHandler.onFailure();
+                        if (!response.getString("result").equals("true"))
+                        {
+                            throw new RuntimeException("Yadoms returned error");
                         }
-                    }
 
-                    @Override
-                    public void onFailure(int statusCode,
-                                          Header[] headers,
-                                          Throwable error,
-                                          JSONObject errorResponse)
+                        JSONArray keywordArray = response.getJSONObject("data").getJSONArray("keyword");
+                        Keyword keywords[] = new Keyword[keywordArray.length()];
+                        for (int jsonIndex = 0; jsonIndex < keywordArray.length(); ++jsonIndex)
+                        {
+                            JSONObject json = keywordArray.getJSONObject(jsonIndex);
+                            keywords[jsonIndex] = new Keyword(json);
+                        }
+                        responseHandler.onSuccess(keywords);
+                    }
+                    catch (JSONException e)
                     {
-                        processHttpFailure(statusCode,
-                                error);
+                        Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
                         responseHandler.onFailure();
                     }
-                });
+                }
+
+                @Override
+                public void onFailure(int statusCode,
+                                      Header[] headers,
+                                      Throwable error,
+                                      JSONObject errorResponse)
+                {
+                    processHttpFailure(statusCode,
+                                       error);
+                    responseHandler.onFailure();
+                }
+            });
     }
 
 
@@ -198,29 +260,29 @@ public class YadomsRestClient
                          final YadomsRestCommandResponseHandler responseHandler)
     {
         post("/rest/device/keyword/" + keywordId + "/command",
-                command,
-                new JsonHttpResponseHandler()
-                {
-                    @Override
-                    public void onSuccess(int statusCode,
-                                          Header[] headers,
-                                          JSONObject response)
-                    {
-                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
-                        responseHandler.onSuccess();
-                    }
+             command,
+             new JsonHttpResponseHandler()
+             {
+                 @Override
+                 public void onSuccess(int statusCode,
+                                       Header[] headers,
+                                       JSONObject response)
+                 {
+                     Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                     responseHandler.onSuccess();
+                 }
 
-                    @Override
-                    public void onFailure(int statusCode,
-                                          Header[] headers,
-                                          Throwable error,
-                                          JSONObject errorResponse)
-                    {
-                        processHttpFailure(statusCode,
-                                error);
-                        responseHandler.onFailure();
-                    }
-                });
+                 @Override
+                 public void onFailure(int statusCode,
+                                       Header[] headers,
+                                       Throwable error,
+                                       JSONObject errorResponse)
+                 {
+                     processHttpFailure(statusCode,
+                                        error);
+                     responseHandler.onFailure();
+                 }
+             });
 
     }
 
