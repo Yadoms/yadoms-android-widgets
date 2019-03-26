@@ -245,6 +245,55 @@ public class YadomsRestClient
             });
     }
 
+    void getKeyword(int keywordId,
+                    final YadomsRestGetResponseHandler responseHandler)
+    {
+        get("/rest/device/keyword/" + keywordId,
+                "",
+                new JsonHttpResponseHandler()
+                {
+                    @Override
+                    public void onSuccess(int statusCode,
+                                          Header[] headers,
+                                          JSONObject response)
+                    {
+                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                        try
+                        {
+                            if (!response.getString("result").equals("true"))
+                            {
+                                throw new RuntimeException("Yadoms returned error");
+                            }
+
+                            JSONArray keywordArray = response.getJSONObject("data").getJSONArray("keyword");
+                            Keyword keywords[] = new Keyword[keywordArray.length()];
+                            for (int jsonIndex = 0; jsonIndex < keywordArray.length(); ++jsonIndex)
+                            {
+                                JSONObject json = keywordArray.getJSONObject(jsonIndex);
+                                keywords[jsonIndex] = new Keyword(json);
+                            }
+                            responseHandler.onSuccess(keywords);
+                        }
+                        catch (JSONException e)
+                        {
+                            Log.w("yadomsRestClient", "Fail to parse /rest/device/keyword answer");
+                            responseHandler.onFailure();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode,
+                                          Header[] headers,
+                                          Throwable error,
+                                          JSONObject errorResponse)
+                    {
+                        processHttpFailure(statusCode,
+                                error);
+                        responseHandler.onFailure();
+                    }
+                });
+    }
+
 
     void command(int keywordId,
                  boolean command,
