@@ -90,7 +90,7 @@ public class YadomsRestClient
                 break;
             default:
                 Toast.makeText(context,
-                        context.getString(R.string.unknown_error),
+                        error.getLocalizedMessage(),
                         Toast.LENGTH_LONG).show();
                 break;
         }
