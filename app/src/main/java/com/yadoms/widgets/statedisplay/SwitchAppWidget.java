@@ -9,6 +9,8 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
 
+import de.greenrobot.event.EventBus;
+
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
@@ -36,6 +38,9 @@ public class SwitchAppWidget
                                    currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
 
         Log.d("updateAppWidget", "prefs.keyword = " + prefs.keyword);
+
+        if (prefs.keyword != 0)
+            EventBus.getDefault().post(new SubscribeToKeywordEvent(prefs.keyword));
 
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);

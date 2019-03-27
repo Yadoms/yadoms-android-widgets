@@ -11,6 +11,12 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
@@ -19,6 +25,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
+import okio.ByteString;
 
 class MessageReceivedEvent
 {
@@ -34,17 +41,18 @@ class MessageReceivedEvent
     }
 }
 
-class SendMessageEvent
+class SubscribeToKeywordEvent
 {
-    private String content;
+    private int keywordId;
 
-    SendMessageEvent(String content) {
-
-        this.content = content;
+    SubscribeToKeywordEvent(int keywordId)
+    {
+        this.keywordId = keywordId;
     }
 
-    public String getContent() {
-        return content;
+    int getKeywordId()
+    {
+        return keywordId;
     }
 }
 
@@ -65,6 +73,13 @@ class YadomsWebSocketListener extends WebSocketListener
     {
         Log.d("YadomsWebSocketListener", "onMessage " + text);
         EventBus.getDefault().post(new MessageReceivedEvent(text));
+    }
+
+    @Override
+    public void onMessage(WebSocket webSocket,
+                          ByteString bytes)
+    {
+        Log.d("YadomsWebSocketListener", "onMessage " + bytes.toString());
     }
 
     @Override
@@ -92,16 +107,17 @@ class YadomsWebSocketListener extends WebSocketListener
 
 public class YadomsWebsocketService extends Service  {
     private static final int CONNECT_TO_WEB_SOCKET = 1;
-    private static final int SEND_MESSAGE = 2;
+    private static final int SUBSCRIBE_TO_KEYWORD = 2;
     private static final int CLOSE_WEB_SOCKET = 3;
     private static final int DISCONNECT_LOOPER = 4;
 
-    private static final String KEY_MESSAGE = "keyMessage";
+    private static final String KEYWORD_ID = "keywordId";
 
     private Handler serviceHandler;
     private Looper serviceLooper;
     private WebSocket webSocket;
     private YadomsWebSocketListener yadomsWebSocketListener;
+    private Set<Integer> listenKeywords = new HashSet<>();
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -114,8 +130,8 @@ public class YadomsWebsocketService extends Service  {
                 case CONNECT_TO_WEB_SOCKET:
                     connectToWebSocket();
                     break;
-                case SEND_MESSAGE:
-                    sendMessageThroughWebSocket(msg.getData().getString(KEY_MESSAGE));
+                case SUBSCRIBE_TO_KEYWORD:
+                    subscribeToKeyword(msg.getData().getInt(KEYWORD_ID));
                     break;
                 case CLOSE_WEB_SOCKET:
                     closeWebSocket();
@@ -127,15 +143,26 @@ public class YadomsWebsocketService extends Service  {
         }
     }
 
-    private void sendMessageThroughWebSocket(String message) {
-//        if (!connected) {
-////            return;
-////        }
-////        try {
-////            webSocket.sendMessage(WebSocket.PayloadType.TEXT, new Buffer().write(message.getBytes()));
-////        } catch (IOException e) {
-////            Timber.d("Error sending message", e);
-////        }
+    private void subscribeToKeyword(int keywordId) {
+        listenKeywords.add(keywordId);
+
+        if (!yadomsWebSocketListener.isConnected())
+        {
+            return;
+        }
+
+        try
+        {
+            JSONObject message = new JSONObject();
+            message.put("type", "acquisitionFilter");
+            message.put("data", new JSONArray(listenKeywords.toArray()));
+            Log.d("YadomsWebsocketService", "subscribeToKeyword, " + message.toString());
+            webSocket.send(message.toString());
+        }
+        catch (JSONException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private void connectToWebSocket() {
@@ -171,7 +198,8 @@ public class YadomsWebsocketService extends Service  {
     }
 
     @Override
-    public void onCreate() {
+    public void onCreate()
+    {
         super.onCreate();
         HandlerThread thread = new HandlerThread("WebSocket service");
         thread.start();
@@ -183,12 +211,13 @@ public class YadomsWebsocketService extends Service  {
         EventBus.getDefault().register(this);
     }
 
-    public void onEvent(SendMessageEvent sendMessageEvent) {//TODO utile ?
+    public void onEvent(SubscribeToKeywordEvent subscribeToKeywordEvent)
+    {
         if (yadomsWebSocketListener.isConnected()) {
             Message message = Message.obtain();
-            message.what = SEND_MESSAGE;
+            message.what = SUBSCRIBE_TO_KEYWORD;
             Bundle data = new Bundle();
-            data.putString(KEY_MESSAGE, sendMessageEvent.getContent());
+            data.putInt(KEYWORD_ID, subscribeToKeywordEvent.getKeywordId());
             message.setData(data);
             serviceHandler.sendMessage(message);
         }
@@ -196,7 +225,8 @@ public class YadomsWebsocketService extends Service  {
 
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         serviceHandler.sendEmptyMessage(CLOSE_WEB_SOCKET);
         serviceHandler.sendEmptyMessage(DISCONNECT_LOOPER);
         EventBus.getDefault().unregister(this);
