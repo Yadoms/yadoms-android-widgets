@@ -6,7 +6,7 @@ import android.preference.PreferenceManager;
 
 class widgetPref
 {
-    private static final String PREF_PREFIX_KEY = "appwidget_";
+    static final String PREF_PREFIX_KEY = "appwidget_";
 
     private final Context context;
     private final int appWidgetId;

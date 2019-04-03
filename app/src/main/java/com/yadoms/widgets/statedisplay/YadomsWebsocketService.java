@@ -2,12 +2,14 @@ package com.yadoms.widgets.statedisplay;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -15,9 +17,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.OkHttpClient;
@@ -27,17 +33,28 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
 
-class MessageReceivedEvent
+import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_KEYWORD_ID;
+import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_VALUE;
+import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_WIDGET_ID;
+import static com.yadoms.widgets.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDATE_ACTION;
+import static com.yadoms.widgets.statedisplay.widgetPref.PREF_PREFIX_KEY;
+
+class AcquisitionUpdateEvent
 {
-    private String content;
+    private int keywordId;
+    private String value;
 
-    MessageReceivedEvent(String content) {
+    AcquisitionUpdateEvent(int keywordId, String value) {
 
-        this.content = content;
+        this.keywordId = keywordId;
+        this.value = value;
     }
 
-    public String getContent() {
-        return content;
+    public int getKeywordId() {
+        return keywordId;
+    }
+    public String getValue() {
+        return value;
     }
 }
 
@@ -72,7 +89,17 @@ class YadomsWebSocketListener extends WebSocketListener
                           String text)
     {
         Log.d("YadomsWebSocketListener", "onMessage " + text);
-        EventBus.getDefault().post(new MessageReceivedEvent(text));
+        try {
+            JSONObject message = new JSONObject(text);
+            if (message.getString("type").equals("AcquisitionUpdate")) {
+                JSONObject data = message.getJSONObject("data");
+                EventBus.getDefault().post(new AcquisitionUpdateEvent(
+                        data.getInt("keywordId"),
+                        data.getString("value")));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -151,6 +178,10 @@ public class YadomsWebsocketService extends Service  {
             return;
         }
 
+        sendKeywordFilterToYadoms();
+    }
+
+    private void sendKeywordFilterToYadoms() {
         try
         {
             JSONObject message = new JSONObject();
@@ -167,7 +198,7 @@ public class YadomsWebsocketService extends Service  {
 
     private void connectToWebSocket() {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .readTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
                 .build();
         Request request = new Request.Builder()
                 .url("ws://10.0.2.2:8080/ws")
@@ -188,7 +219,18 @@ public class YadomsWebsocketService extends Service  {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //TODO do something useful
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Map<String, ?> allPrefs = prefs.getAll();
+        for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
+            if (entry.getKey().matches(PREF_PREFIX_KEY + "\\d+" + "keyword")) {
+                listenKeywords.add((Integer)entry.getValue());
+            }
+        }
+        if (!listenKeywords.isEmpty()) {
+            sendKeywordFilterToYadoms();
+        }
+
         return Service.START_NOT_STICKY;
     }
 
@@ -221,6 +263,37 @@ public class YadomsWebsocketService extends Service  {
             message.setData(data);
             serviceHandler.sendMessage(message);
         }
+    }
+
+    public void onEvent(AcquisitionUpdateEvent acquisitionUpdateEvent)
+    {
+        if (yadomsWebSocketListener.isConnected()) {
+            ArrayList<Integer> widgetsId = findWidgetsUsingKeyword(acquisitionUpdateEvent.getKeywordId());
+            for (int widgetId : widgetsId) {
+                Intent intent = new Intent(getApplicationContext(), SwitchAppWidget.class);
+                intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
+                intent.putExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, widgetId);
+                intent.putExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, acquisitionUpdateEvent.getKeywordId());
+                intent.putExtra(REMOTE_UPDATE_ACTION_VALUE, acquisitionUpdateEvent.getValue());
+                sendBroadcast(intent);
+            }
+        }
+    }
+
+    private ArrayList<Integer> findWidgetsUsingKeyword(int keywordId) {
+        ArrayList<Integer> widgets = new ArrayList<>();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Map<String, ?> allPrefs = prefs.getAll();
+        Pattern pattern = Pattern.compile(PREF_PREFIX_KEY + "(\\d+)" + "keyword");
+        for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
+            Matcher matcher = pattern.matcher(entry.getKey());
+            if (matcher.find()) {
+                widgets.add(Integer.parseInt(matcher.group(1)));
+            }
+        }
+
+        return widgets;
     }
 
 

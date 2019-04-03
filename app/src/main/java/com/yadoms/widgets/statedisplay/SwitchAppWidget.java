@@ -9,8 +9,6 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
 
-import de.greenrobot.event.EventBus;
-
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
@@ -20,6 +18,11 @@ public class SwitchAppWidget
 {
     public static String CLICK_ON_WIDGET_ACTION = "ClickOnWidgetAction";
     public static String WIDGET_ACTION_WIDGET_ID = "WidgetId";
+
+    public static String WIDGET_REMOTE_UPDATE_ACTION = "WidgetRemoteUpdateAction";
+    public static String REMOTE_UPDATE_ACTION_WIDGET_ID = "WidgetId";
+    public static String REMOTE_UPDATE_ACTION_KEYWORD_ID = "KeywordId";
+    public static String REMOTE_UPDATE_ACTION_VALUE = "Value";
 
     private static SparseBooleanArray currentState = new SparseBooleanArray();
 
@@ -39,8 +42,9 @@ public class SwitchAppWidget
 
         Log.d("updateAppWidget", "prefs.keyword = " + prefs.keyword);
 
-        if (prefs.keyword != 0)
-            EventBus.getDefault().post(new SubscribeToKeywordEvent(prefs.keyword));
+        //TODO dans le service, mettre un listener sur les préférences pour mettre à jour la liste de KW à s'inscrire
+//        if (prefs.keyword != 0)
+//            EventBus.getDefault().post(new SubscribeToKeywordEvent(prefs.keyword));
 
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);
@@ -73,7 +77,15 @@ public class SwitchAppWidget
                 {
                     onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
                 }
-                    });
+                              });
+        }
+        else if(intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION))
+        {
+            final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
+            final int keywordId = intent.getIntExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, 0);
+            final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
+            currentState.put(widgetId, !value.equals("0"));
+            onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
         }
     }
 
