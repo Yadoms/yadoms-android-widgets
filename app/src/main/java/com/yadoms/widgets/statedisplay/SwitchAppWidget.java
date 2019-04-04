@@ -30,7 +30,7 @@ public class SwitchAppWidget
                                 AppWidgetManager appWidgetManager,
                                 int appWidgetId)
     {
-        widgetPref prefs = new widgetPref(context, appWidgetId);
+        widgetPrefs prefs = new widgetPrefs(context, appWidgetId);
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
@@ -68,7 +68,7 @@ public class SwitchAppWidget
             currentState.put(widgetId, !(currentState.get(widgetId)));
 
             YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
-            yadomsRestClient.command(new widgetPref(context,
+            yadomsRestClient.command(new widgetPrefs(context,
                     widgetId).keyword,
                     currentState.get(widgetId),
                     new YadomsRestCommandResponseHandler(){
@@ -108,7 +108,7 @@ public class SwitchAppWidget
         // When the user deletes the widget, delete the preference associated with it.
         for (int appWidgetId : appWidgetIds)
         {
-            widgetPref prefs = new widgetPref(context, appWidgetId);
+            widgetPrefs prefs = new widgetPrefs(context, appWidgetId);
             prefs.delete();
         }
     }

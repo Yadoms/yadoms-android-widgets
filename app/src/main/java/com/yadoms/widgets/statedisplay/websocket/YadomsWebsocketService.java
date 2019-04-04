@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.widgets.statedisplay.websocket;
 
 import android.app.Service;
 import android.content.Intent;
@@ -10,8 +10,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.yadoms.widgets.statedisplay.SwitchAppWidget;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,109 +29,16 @@ import java.util.regex.Pattern;
 import de.greenrobot.event.EventBus;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
-import okio.ByteString;
 
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_KEYWORD_ID;
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_VALUE;
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_WIDGET_ID;
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDATE_ACTION;
-import static com.yadoms.widgets.statedisplay.widgetPref.PREF_PREFIX_KEY;
+import static com.yadoms.widgets.statedisplay.widgetPrefs.PREF_PREFIX_KEY;
 
-class AcquisitionUpdateEvent
-{
-    private int keywordId;
-    private String value;
 
-    AcquisitionUpdateEvent(int keywordId, String value) {
 
-        this.keywordId = keywordId;
-        this.value = value;
-    }
-
-    public int getKeywordId() {
-        return keywordId;
-    }
-    public String getValue() {
-        return value;
-    }
-}
-
-class SubscribeToKeywordEvent
-{
-    private int keywordId;
-
-    SubscribeToKeywordEvent(int keywordId)
-    {
-        this.keywordId = keywordId;
-    }
-
-    int getKeywordId()
-    {
-        return keywordId;
-    }
-}
-
-class YadomsWebSocketListener extends WebSocketListener
-{
-    private boolean connected;
-
-    @Override
-    public void onOpen(WebSocket webSocket,
-                       Response response)
-    {
-        connected = true;
-    }
-
-    @Override
-    public void onMessage(WebSocket webSocket,
-                          String text)
-    {
-        Log.d("YadomsWebSocketListener", "onMessage " + text);
-        try {
-            JSONObject message = new JSONObject(text);
-            if (message.getString("type").equals("AcquisitionUpdate")) {
-                JSONObject data = message.getJSONObject("data");
-                EventBus.getDefault().post(new AcquisitionUpdateEvent(
-                        data.getInt("keywordId"),
-                        data.getString("value")));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onMessage(WebSocket webSocket,
-                          ByteString bytes)
-    {
-        Log.d("YadomsWebSocketListener", "onMessage " + bytes.toString());
-    }
-
-    @Override
-    public void onClosed(WebSocket webSocket,
-                         int code,
-                         String reason)
-    {
-        connected = false;
-        Log.d("YadomsWebSocketListener", "Websocket is closed " + code + reason);
-    }
-
-    @Override
-    public void onFailure(WebSocket webSocket,
-                          Throwable t,
-                          @Nullable Response response)
-    {
-        connected = false;
-        Log.d("YadomsWebSocketListener", "Websocket is closed " + t.getMessage());
-    }
-
-    boolean isConnected() {
-        return connected;
-    }
-}
 
 public class YadomsWebsocketService extends Service  {
     private static final int CONNECT_TO_WEB_SOCKET = 1;

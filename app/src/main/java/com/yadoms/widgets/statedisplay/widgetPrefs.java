@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-class widgetPref
+public class widgetPrefs
 {
-    static final String PREF_PREFIX_KEY = "appwidget_";
+    public static final String PREF_PREFIX_KEY = "appwidget_";
 
     private final Context context;
     private final int appWidgetId;
@@ -14,8 +14,8 @@ class widgetPref
     Integer keyword;
     String label;
 
-    widgetPref(Context context,
-               int appWidgetId)
+    widgetPrefs(Context context,
+                int appWidgetId)
     {
         this.context = context;
         this.appWidgetId = appWidgetId;

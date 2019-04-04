@@ -32,12 +32,12 @@ public class SwitchAppWidgetConfigureActivity
 
             // Save prefs
             Log.d("onClick", "mAppWidgetId = " + mAppWidgetId);
-            widgetPref prefs = new widgetPref(context, mAppWidgetId);
+            widgetPrefs prefs = new widgetPrefs(context, mAppWidgetId);
             prefs.keyword = selectedKeyword.getId();
             prefs.label = viewHolder.labelEditText.getText().toString();
             prefs.save();
 
-            prefs = new widgetPref(context, mAppWidgetId);
+            prefs = new widgetPrefs(context, mAppWidgetId);
             Log.d("onClick", "prefs.keyword = " + prefs.keyword);
             Log.d("onClick", "prefs.label = " + prefs.label);
 
