@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.yadoms.widgets.statedisplay.websocket.YadomsWebsocketService;
-
 public class MainActivity
         extends AppCompatActivity
 {
@@ -17,10 +15,14 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Util.createWidgetsUpdateJob(getApplicationContext());
+
+        /*
         Intent i = new Intent(getApplicationContext(), YadomsWebsocketService.class);
         // TODO potentially add data to the intent
         i.putExtra("KEY1", "Value to be used by the service");
         getApplicationContext().startService(i);
+        */
     }
 
     public void openSettingsActivity(View view)

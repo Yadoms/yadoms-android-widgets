@@ -109,7 +109,7 @@ public class YadomsRestClient
                                       Header[] headers,
                                       JSONObject response)
                 {
-                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                     try
                     {
                         if (!response.getString("result").equals("true"))
@@ -159,7 +159,7 @@ public class YadomsRestClient
                                       Header[] headers,
                                       JSONObject response)
                 {
-                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                     try
                     {
                         if (!response.getString("result").equals("true"))
@@ -208,7 +208,7 @@ public class YadomsRestClient
                                       Header[] headers,
                                       JSONObject response)
                 {
-                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                     try
                     {
                         if (!response.getString("result").equals("true"))
@@ -245,8 +245,8 @@ public class YadomsRestClient
             });
     }
 
-    void getKeyword(int keywordId,
-                    final YadomsRestGetResponseHandler responseHandler)
+    void getKeywordLastValue(int keywordId,
+                             final YadomsRestGetResponseHandler responseHandler)
     {
         get("/rest/device/keyword/" + keywordId,
                 "",
@@ -257,7 +257,7 @@ public class YadomsRestClient
                                           Header[] headers,
                                           JSONObject response)
                     {
-                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                         try
                         {
                             if (!response.getString("result").equals("true"))
@@ -265,14 +265,9 @@ public class YadomsRestClient
                                 throw new RuntimeException("Yadoms returned error");
                             }
 
-                            JSONArray keywordArray = response.getJSONObject("data").getJSONArray("keyword");
-                            Keyword keywords[] = new Keyword[keywordArray.length()];
-                            for (int jsonIndex = 0; jsonIndex < keywordArray.length(); ++jsonIndex)
-                            {
-                                JSONObject json = keywordArray.getJSONObject(jsonIndex);
-                                keywords[jsonIndex] = new Keyword(json);
-                            }
-                            responseHandler.onSuccess(keywords);
+                            String lastValue[] = new String[1];
+                            lastValue[0] = response.getJSONObject("data").getString("lastAcquisitionValue");
+                            responseHandler.onSuccess(lastValue);
                         }
                         catch (JSONException e)
                         {
@@ -317,7 +312,7 @@ public class YadomsRestClient
                                        Header[] headers,
                                        JSONObject response)
                  {
-                     Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode);
+                     Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                      responseHandler.onSuccess();
                  }
 

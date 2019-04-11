@@ -74,4 +74,7 @@
     <string name="label">Label</string>
     <string name="selectDevice">Select a device</string>
     <string name="selectKeyword">Select keyword</string>
+    <string name="notification_title">Yadoms is running</string>
+    <string name="notification_message">Yadoms is running. Tap to access settings.</string>
+    <string name="ticker_text">ticker_text</string>
 </resources>

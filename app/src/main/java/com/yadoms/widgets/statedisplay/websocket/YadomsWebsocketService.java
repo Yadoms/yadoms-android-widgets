@@ -1,5 +1,7 @@
 package com.yadoms.widgets.statedisplay.websocket;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,7 +14,10 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.yadoms.widgets.statedisplay.R;
+import com.yadoms.widgets.statedisplay.SettingsActivity;
 import com.yadoms.widgets.statedisplay.SwitchAppWidget;
+import com.yadoms.widgets.statedisplay.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,8 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.OkHttpClient;
@@ -41,12 +44,13 @@ import static com.yadoms.widgets.statedisplay.widgetPrefs.PREF_PREFIX_KEY;
 
 
 public class YadomsWebsocketService extends Service  {
-    private static final int CONNECT_TO_WEB_SOCKET = 1;
-    private static final int SUBSCRIBE_TO_KEYWORD = 2;
-    private static final int CLOSE_WEB_SOCKET = 3;
-    private static final int DISCONNECT_LOOPER = 4;
+    private static final int SUBSCRIBE_TO_KEYWORD = 1;
+    private static final int CLOSE_WEB_SOCKET = 2;
+    private static final int DISCONNECT_LOOPER = 3;
 
     private static final String KEYWORD_ID = "keywordId";
+
+    private static final int ONGOING_NOTIFICATION_ID = 1;
 
     private Handler serviceHandler;
     private Looper serviceLooper;
@@ -62,9 +66,6 @@ public class YadomsWebsocketService extends Service  {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case CONNECT_TO_WEB_SOCKET:
-                    connectToWebSocket();
-                    break;
                 case SUBSCRIBE_TO_KEYWORD:
                     subscribeToKeyword(msg.getData().getInt(KEYWORD_ID));
                     break;
@@ -104,12 +105,12 @@ public class YadomsWebsocketService extends Service  {
         }
     }
 
-    private void connectToWebSocket() {
+    private void connectToWebSocket(String server_url, String server_port) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build();
         Request request = new Request.Builder()
-                .url("ws://10.0.2.2:8080/ws")
+                .url("ws://" + server_url + ":" + server_port + "/ws")
                 .build();
         yadomsWebSocketListener = new YadomsWebSocketListener();
         webSocket = okHttpClient.newWebSocket(request, yadomsWebSocketListener);
@@ -127,9 +128,11 @@ public class YadomsWebsocketService extends Service  {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Map<String, ?> allPrefs = prefs.getAll();
+
+        connectToWebSocket(prefs.getString("server_url", null).trim(), prefs.getString("server_port", "8080").trim());
+
         for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
             if (entry.getKey().matches(PREF_PREFIX_KEY + "\\d+" + "keyword")) {
                 listenKeywords.add((Integer)entry.getValue());
@@ -151,12 +154,24 @@ public class YadomsWebsocketService extends Service  {
     public void onCreate()
     {
         super.onCreate();
+
+        Intent notificationIntent = new Intent(this, SettingsActivity.class);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        Notification notification =
+                new Notification.Builder(this)
+                        .setContentTitle(getText(R.string.notification_title))
+                        .setContentText(getText(R.string.notification_message))
+                        .setSmallIcon(R.drawable.small_icon)
+                        .setContentIntent(pendingIntent)
+                        .setTicker(getText(R.string.ticker_text))
+                        .build();
+        startForeground(ONGOING_NOTIFICATION_ID, notification);
+
         HandlerThread thread = new HandlerThread("WebSocket service");
         thread.start();
         serviceLooper = thread.getLooper();
         serviceHandler = new ServiceHandler(serviceLooper);
-
-        serviceHandler.sendEmptyMessage(CONNECT_TO_WEB_SOCKET);
 
         EventBus.getDefault().register(this);
     }
@@ -176,7 +191,7 @@ public class YadomsWebsocketService extends Service  {
     public void onEvent(AcquisitionUpdateEvent acquisitionUpdateEvent)
     {
         if (yadomsWebSocketListener.isConnected()) {
-            ArrayList<Integer> widgetsId = findWidgetsUsingKeyword(acquisitionUpdateEvent.getKeywordId());
+            ArrayList<Integer> widgetsId = Util.findWidgetsUsingKeyword(getApplicationContext(), acquisitionUpdateEvent.getKeywordId());
             for (int widgetId : widgetsId) {
                 Intent intent = new Intent(getApplicationContext(), SwitchAppWidget.class);
                 intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
@@ -188,29 +203,16 @@ public class YadomsWebsocketService extends Service  {
         }
     }
 
-    private ArrayList<Integer> findWidgetsUsingKeyword(int keywordId) {
-        ArrayList<Integer> widgets = new ArrayList<>();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Map<String, ?> allPrefs = prefs.getAll();
-        Pattern pattern = Pattern.compile(PREF_PREFIX_KEY + "(\\d+)" + "keyword");
-        for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-            Matcher matcher = pattern.matcher(entry.getKey());
-            if (matcher.find()) {
-                widgets.add(Integer.parseInt(matcher.group(1)));
-            }
-        }
-
-        return widgets;
-    }
-
-
     @Override
     public void onDestroy()
     {
         serviceHandler.sendEmptyMessage(CLOSE_WEB_SOCKET);
         serviceHandler.sendEmptyMessage(DISCONNECT_LOOPER);
         EventBus.getDefault().unregister(this);
+
+//        Intent broadcastIntent = new Intent(this, ServiceRestarterBroadcastReceiver.class);
+//        sendBroadcast(broadcastIntent);
+
         super.onDestroy();
     }
 }
