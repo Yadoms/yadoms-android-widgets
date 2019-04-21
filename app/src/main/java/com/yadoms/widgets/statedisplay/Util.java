@@ -19,7 +19,7 @@ public class Util {
             ComponentName serviceComponent = new ComponentName(context, ReadWidgetsStateJobService.class);
             JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent)
                     .setMinimumLatency(1000)
-                    .setOverrideDeadline(3000)
+                    .setOverrideDeadline(5000)
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                     .setRequiresDeviceIdle(false)
                     .setPersisted(true);
