@@ -5,7 +5,6 @@ import android.app.job.JobService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,8 +56,6 @@ public class ReadWidgetsStateJobService extends JobService {
                 @Override
                 void onFailure()
                 {
-                    Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.unknown_error),
-                            Toast.LENGTH_LONG).show();
                 }
             });
         }
