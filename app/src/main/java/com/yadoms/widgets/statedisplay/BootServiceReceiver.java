@@ -8,6 +8,9 @@ public class BootServiceReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Util.createWidgetsUpdateJob(context);
+        if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED))
+        {
+            Util.createWidgetsUpdateJob(context);
+        }
     }
 }

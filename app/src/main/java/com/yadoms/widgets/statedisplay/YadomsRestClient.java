@@ -71,10 +71,11 @@ public class YadomsRestClient
     }
 
     private void processHttpFailure(int statusCode,
+                                    String requestName,
                                     Throwable error)
     {
         Log.e("yadomsRestClient",
-              "onFailure, statusCode = " + statusCode + ", " + error);
+                requestName + " : onFailure, statusCode = " + statusCode + ", " + error);
 
         switch (statusCode)
         {
@@ -91,9 +92,6 @@ public class YadomsRestClient
                                Toast.LENGTH_LONG).show();
                 break;
             default:
-                Toast.makeText(context,
-                               error.getLocalizedMessage(),
-                               Toast.LENGTH_LONG).show();
                 break;
         }
     }
@@ -140,6 +138,7 @@ public class YadomsRestClient
                                       JSONObject errorResponse)
                 {
                     processHttpFailure(statusCode,
+                            "getAllDevices",
                                        error);
                     responseHandler.onFailure();
                 }
@@ -190,6 +189,7 @@ public class YadomsRestClient
                                       JSONObject errorResponse)
                 {
                     processHttpFailure(statusCode,
+                                       "getDevicesWithCapacity",
                                        error);
                     responseHandler.onFailure();
                 }
@@ -239,6 +239,7 @@ public class YadomsRestClient
                                       JSONObject errorResponse)
                 {
                     processHttpFailure(statusCode,
+                            "getDeviceKeywords",
                                        error);
                     responseHandler.onFailure();
                 }
@@ -283,6 +284,7 @@ public class YadomsRestClient
                                           JSONObject errorResponse)
                     {
                         processHttpFailure(statusCode,
+                                "getKeywordLastValue",
                                 error);
                         responseHandler.onFailure();
                     }
@@ -323,6 +325,7 @@ public class YadomsRestClient
                                        JSONObject errorResponse)
                  {
                      processHttpFailure(statusCode,
+                             "command",
                                         error);
                      responseHandler.onFailure();
                  }

@@ -18,23 +18,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
-
         </receiver>
-        <receiver
-            android:name=".websocket.ServiceRestarterBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true" />
 
         <service android:name=".ReadWidgetsStateJobService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-        <service
-            android:name=".websocket.YadomsWebsocketService"
-            android:enabled="true"
-            android:exported="true" />
 
         <activity
             android:name=".SettingsActivity"

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 import static com.yadoms.widgets.statedisplay.widgetPrefs.PREF_PREFIX_KEY;
 
-public class Util {
+class Util {
     static void createWidgetsUpdateJob(Context context) {
             ComponentName serviceComponent = new ComponentName(context, ReadWidgetsStateJobService.class);
             JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent)
@@ -27,7 +27,7 @@ public class Util {
             jobScheduler.schedule(builder.build());
         }
 
-    public static ArrayList<Integer> findWidgetsUsingKeyword(Context context, int keywordId) {
+    static ArrayList<Integer> findWidgetsUsingKeyword(Context context, int keywordId) {
         ArrayList<Integer> widgets = new ArrayList<>();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
