@@ -39,7 +39,6 @@
         android:title="@string/basic_authentication_username"/>
 
     <EditTextPreference
-        android:defaultValue="yadoms2017"
         android:enabled="false"
         android:inputType="textPassword"
         android:key="basic_authentication_password"

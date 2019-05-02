@@ -31,16 +31,10 @@ public class SwitchAppWidgetConfigureActivity
             final Context context = SwitchAppWidgetConfigureActivity.this;
 
             // Save prefs
-            Log.d("onClick", "mAppWidgetId = " + mAppWidgetId);
             widgetPrefs prefs = new widgetPrefs(context, mAppWidgetId);
             prefs.keyword = selectedKeyword.getId();
             prefs.label = viewHolder.labelEditText.getText().toString();
             prefs.save();
-
-            prefs = new widgetPrefs(context, mAppWidgetId);
-            Log.d("onClick", "prefs.keyword = " + prefs.keyword);
-            Log.d("onClick", "prefs.label = " + prefs.label);
-
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -50,6 +44,10 @@ public class SwitchAppWidgetConfigureActivity
             Intent resultValue = new Intent();
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
             setResult(RESULT_OK, resultValue);
+
+            // Start monitoring widget state (if not already started)
+            Util.createWidgetsUpdateJob(getApplicationContext());
+
             finish();
         }
     };
@@ -94,84 +92,92 @@ public class SwitchAppWidgetConfigureActivity
         viewHolder.submitButton.setOnClickListener(onSubmitButtonClick);
         viewHolder.submitButton.setEnabled(false);
 
-        final YadomsRestClient client = new YadomsRestClient(getApplicationContext());
-        client.getDevicesWithCapacity(EKeywordAccessMode.GetSet,
-                                      "switch",
-                                      new YadomsRestGetResponseHandler()
-                                      {
-                                          @Override
-                                          void onSuccess(Object[] objects)
-                                          {
-                                              final Device[] devices = (Device[]) objects;
-                                              ArrayAdapter<Device> aa = new ArrayAdapter<>(getApplicationContext(),
-                                                                                           android.R.layout.simple_spinner_dropdown_item,
-                                                                                           devices);
-                                              aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                              viewHolder.deviceSelectionSpinner.setAdapter(aa);
-                                              viewHolder.deviceSelectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-                                              {
-                                                  @Override
-                                                  public void onItemSelected(AdapterView<?> adapterView,
-                                                                             View view,
-                                                                             int i,
-                                                                             long l)
-                                                  {
-                                                      client.getDeviceKeywords(devices[i].getId(),
-                                                                               new YadomsRestGetResponseHandler()
-                                                                               {
-                                                                                   @Override
-                                                                                   void onSuccess(Object[] objects)
-                                                                                   {
-                                                                                       final Keyword[] keywords = (Keyword[]) objects;
-                                                                                       ArrayAdapter<Keyword> aa = new ArrayAdapter<>(
-                                                                                               getApplicationContext(),
-                                                                                               android.R.layout.simple_spinner_dropdown_item,
-                                                                                               keywords);
-                                                                                       aa.setDropDownViewResource(
-                                                                                               android.R.layout.simple_spinner_dropdown_item);
-                                                                                       viewHolder.keywordSelectionSpinner
-                                                                                               .setAdapter(aa);
-                                                                                       viewHolder.keywordSelectionSpinner
-                                                                                               .setOnItemSelectedListener(
-                                                                                                       new AdapterView.OnItemSelectedListener()
-                                                                                                       {
-                                                                                                           @Override
-                                                                                                           public void onItemSelected(AdapterView<?> adapterView,
-                                                                                                                                      View view,
-                                                                                                                                      int i,
-                                                                                                                                      long l)
-                                                                                                           {
-                                                                                                               Log.d("KeywordSelected",
-                                                                                                                     "keyword Id=" + keywords[i]
-                                                                                                                             .getId() + " " + keywords[i]
-                                                                                                                             .getFriendlyName());
-                                                                                                               selectedKeyword = keywords[i];
-                                                                                                               viewHolder.submitButton
-                                                                                                                       .setEnabled(
-                                                                                                                               true);
-                                                                                                           }
+        try {
+            final YadomsRestClient client = new YadomsRestClient(getApplicationContext());
+            client.getDevicesWithCapacity(EKeywordAccessMode.GetSet,
+                    "switch",
+                    new YadomsRestGetResponseHandler()
+                    {
+                        @Override
+                        void onSuccess(Object[] objects)
+                        {
+                            final Device[] devices = (Device[]) objects;
+                            ArrayAdapter<Device> aa = new ArrayAdapter<>(getApplicationContext(),
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    devices);
+                            aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            viewHolder.deviceSelectionSpinner.setAdapter(aa);
+                            viewHolder.deviceSelectionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                            {
+                                @Override
+                                public void onItemSelected(AdapterView<?> adapterView,
+                                                           View view,
+                                                           int i,
+                                                           long l)
+                                {
+                                    client.getDeviceKeywords(devices[i].getId(),
+                                            new YadomsRestGetResponseHandler()
+                                            {
+                                                @Override
+                                                void onSuccess(Object[] objects)
+                                                {
+                                                    final Keyword[] keywords = (Keyword[]) objects;
+                                                    ArrayAdapter<Keyword> aa = new ArrayAdapter<>(
+                                                            getApplicationContext(),
+                                                            android.R.layout.simple_spinner_dropdown_item,
+                                                            keywords);
+                                                    aa.setDropDownViewResource(
+                                                            android.R.layout.simple_spinner_dropdown_item);
+                                                    viewHolder.keywordSelectionSpinner
+                                                            .setAdapter(aa);
+                                                    viewHolder.keywordSelectionSpinner
+                                                            .setOnItemSelectedListener(
+                                                                    new AdapterView.OnItemSelectedListener()
+                                                                    {
+                                                                        @Override
+                                                                        public void onItemSelected(AdapterView<?> adapterView,
+                                                                                                   View view,
+                                                                                                   int i,
+                                                                                                   long l)
+                                                                        {
+                                                                            Log.d("KeywordSelected",
+                                                                                    "keyword Id=" + keywords[i]
+                                                                                            .getId() + " " + keywords[i]
+                                                                                            .getFriendlyName());
+                                                                            selectedKeyword = keywords[i];
+                                                                            viewHolder.submitButton
+                                                                                    .setEnabled(
+                                                                                            true);
+                                                                        }
 
-                                                                                                           @Override
-                                                                                                           public void onNothingSelected(AdapterView<?> adapterView)
-                                                                                                           {
-                                                                                                               selectedKeyword = null;
-                                                                                                               viewHolder.submitButton
-                                                                                                                       .setEnabled(
-                                                                                                                               false);
-                                                                                                           }
-                                                                                                       });
-                                                                                   }
-                                                                               });
-                                                  }
+                                                                        @Override
+                                                                        public void onNothingSelected(AdapterView<?> adapterView)
+                                                                        {
+                                                                            selectedKeyword = null;
+                                                                            viewHolder.submitButton
+                                                                                    .setEnabled(
+                                                                                            false);
+                                                                        }
+                                                                    });
+                                                }
+                                            });
+                                }
 
-                                                  @Override
-                                                  public void onNothingSelected(AdapterView<?> adapterView)
-                                                  {
-                                                      viewHolder.submitButton.setEnabled(false);
-                                                  }
-                                              });
-                                          }
-                                      });
+                                @Override
+                                public void onNothingSelected(AdapterView<?> adapterView)
+                                {
+                                    viewHolder.submitButton.setEnabled(false);
+                                }
+                            });
+                        }
+                    });
+        }
+        catch (InvalidConfigurationException e)
+        {
+            Log.e("onCreate", e.getMessage());
+            //TODO ajouter modal indiquant que le serveur doit auparavant être configué et lancer l'activité de configuration du serveur
+            finish();
+        }
     }
 
     protected class ViewHolder

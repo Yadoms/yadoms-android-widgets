@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class widgetPrefs
+class widgetPrefs
 {
-    public static final String PREF_PREFIX_KEY = "appwidget_";
+    static final String PREF_PREFIX_KEY = "appwidget_";
 
     private final Context context;
     private final int appWidgetId;
@@ -25,23 +25,23 @@ public class widgetPrefs
     private void load()
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        keyword = prefs.getInt(PREF_PREFIX_KEY + appWidgetId + "keyword", 0);
-        label = prefs.getString(PREF_PREFIX_KEY + appWidgetId + "label", null);
+        keyword = prefs.getInt(PREF_PREFIX_KEY + appWidgetId + "_keyword", 0);
+        label = prefs.getString(PREF_PREFIX_KEY + appWidgetId + "_label", null);
     }
 
     void save()
     {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        prefs.putInt(PREF_PREFIX_KEY + appWidgetId + "keyword", keyword);
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId + "label", label);
+        prefs.putInt(PREF_PREFIX_KEY + appWidgetId + "_keyword", keyword);
+        prefs.putString(PREF_PREFIX_KEY + appWidgetId + "_label", label);
         prefs.apply();
     }
 
     void delete()
     {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        prefs.remove(PREF_PREFIX_KEY + appWidgetId + "keyword");
-        prefs.remove(PREF_PREFIX_KEY + appWidgetId + "label");
+        prefs.remove(PREF_PREFIX_KEY + appWidgetId + "_keyword");
+        prefs.remove(PREF_PREFIX_KEY + appWidgetId + "_label");
         prefs.apply();
     }
 }

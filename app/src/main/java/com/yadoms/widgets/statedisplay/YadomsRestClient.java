@@ -31,6 +31,11 @@ public class YadomsRestClient
 
         String yadomsServerAddress = prefs.getString("server_url", null);
         String yadomsServerPort = prefs.getString("server_port", "8080");
+
+        if (yadomsServerAddress == null || yadomsServerAddress.isEmpty()
+            || yadomsServerPort == null || yadomsServerPort.isEmpty())
+            throw new InvalidConfigurationException("server_url or server_port not defined");
+
         baseUrl = "http://" + yadomsServerAddress.trim() + ":" + yadomsServerPort.trim();
 
         boolean yadomsBasicAuthenticationEnable = prefs.getBoolean("basic_authentication", false);

@@ -40,8 +40,6 @@ public class SwitchAppWidget
         views.setImageViewResource(R.id.appwidget_image,
                                    currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
 
-        Log.d("updateAppWidget", "prefs.keyword = " + prefs.keyword);
-
         //TODO dans le service, mettre un listener sur les préférences pour mettre à jour la liste de KW à s'inscrire
 //        if (prefs.keyword != 0)
 //            EventBus.getDefault().post(new SubscribeToKeywordEvent(prefs.keyword));
@@ -49,7 +47,7 @@ public class SwitchAppWidget
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);
         intent.putExtra(WIDGET_ACTION_WIDGET_ID, appWidgetId);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
 
         // Instruct the widget manager to update the widget
@@ -62,30 +60,36 @@ public class SwitchAppWidget
     {
         super.onReceive(context, intent);
 
-        if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION))
+        try
         {
-            final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
-            currentState.put(widgetId, !(currentState.get(widgetId)));
+            if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION))
+            {
+                final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
+                currentState.put(widgetId, !(currentState.get(widgetId)));
 
-            YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
-            yadomsRestClient.command(new widgetPrefs(context,
-                    widgetId).keyword,
-                    currentState.get(widgetId),
-                    new YadomsRestCommandResponseHandler(){
-                @Override
-                public void onSuccess()
-                {
-                    onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
-                }
-                              });
+                YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
+                yadomsRestClient.command(new widgetPrefs(context, widgetId).keyword,
+                        currentState.get(widgetId),
+                        new YadomsRestCommandResponseHandler(){
+                            @Override
+                            public void onSuccess()
+                            {
+                                onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+                            }
+                        });
+            }
+            else if(intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION))
+            {
+                final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
+                final int keywordId = intent.getIntExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, 0);
+                final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
+                currentState.put(widgetId, !value.equals("0"));
+                onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+            }
         }
-        else if(intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION))
+        catch (InvalidConfigurationException e)
         {
-            final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
-            final int keywordId = intent.getIntExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, 0);
-            final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
-            currentState.put(widgetId, !value.equals("0"));
-            onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+            Log.e("onReceive", e.getMessage());
         }
     }
 

@@ -18,8 +18,8 @@ class Util {
     static void createWidgetsUpdateJob(Context context) {
             ComponentName serviceComponent = new ComponentName(context, ReadWidgetsStateJobService.class);
             JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent)
-                    .setMinimumLatency(1000)
-                    .setOverrideDeadline(5000)
+                    .setMinimumLatency(5000)
+                    .setOverrideDeadline(30000)
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                     .setRequiresDeviceIdle(false)
                     .setPersisted(true);
@@ -32,12 +32,13 @@ class Util {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Map<String, ?> allPrefs = prefs.getAll();
-        Pattern pattern = Pattern.compile(PREF_PREFIX_KEY + "(\\d+)" + "keyword");
+        Pattern pattern = Pattern.compile(PREF_PREFIX_KEY + "(\\d+)" + "_keyword");
         for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-            //TODO filtrer avec keywordId
             Matcher matcher = pattern.matcher(entry.getKey());
             if (matcher.find()) {
-                widgets.add(Integer.parseInt(matcher.group(1)));
+                int widgetId = Integer.parseInt(matcher.group(1));
+                if ((Integer)allPrefs.get(matcher.group(0)) == keywordId)
+                    widgets.add(widgetId);
             }
         }
 
