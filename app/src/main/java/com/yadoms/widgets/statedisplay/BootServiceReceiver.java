@@ -10,7 +10,7 @@ public class BootServiceReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED))
         {
-            Util.createWidgetsUpdateJob(context);
+            ReadWidgetsStateJobService.start(context);
         }
     }
 }

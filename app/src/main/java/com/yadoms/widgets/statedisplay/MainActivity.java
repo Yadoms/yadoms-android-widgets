@@ -15,7 +15,9 @@ public class MainActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Util.createWidgetsUpdateJob(getApplicationContext());
+        ScreenStateReceiver.start(getApplicationContext());
+
+        ReadWidgetsStateJobService.start(getApplicationContext());
     }
 
     public void openSettingsActivity(View view)

@@ -1,7 +1,11 @@
 package com.yadoms.widgets.statedisplay;
 
+import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.app.job.JobService;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -19,6 +23,32 @@ import static com.yadoms.widgets.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDA
 import static com.yadoms.widgets.statedisplay.widgetPrefs.PREF_PREFIX_KEY;
 
 public class ReadWidgetsStateJobService extends JobService {
+
+    static private boolean isScreenOn = true;
+
+    static void notifyScreenOn(Context context, boolean on) {
+        isScreenOn = on;
+        start(context);
+    }
+
+    static void start(Context context) {
+
+        if (!isScreenOn) {
+            Log.d("UpdateWidgetsService", "Screen is OFF, service stopped");
+            return;
+        }
+
+        Log.d("UpdateWidgetsService", "Service started");
+        ComponentName serviceComponent = new ComponentName(context, ReadWidgetsStateJobService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent)
+                .setMinimumLatency(1000)
+                .setOverrideDeadline(3000)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setRequiresDeviceIdle(false)
+                .setPersisted(true);
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        jobScheduler.schedule(builder.build());
+    }
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
@@ -63,7 +93,7 @@ public class ReadWidgetsStateJobService extends JobService {
                     }
                 });
             }
-            Util.createWidgetsUpdateJob(getApplicationContext());
+            start(getApplicationContext());
             return true;
         }
         catch (InvalidConfigurationException e)
