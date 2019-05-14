@@ -4,5 +4,5 @@ enum EKeywordAccessMode
 {
     NoAccess,
     Get,
-    GetSet;
+    GetSet
 }

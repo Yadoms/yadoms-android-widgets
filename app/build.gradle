@@ -28,6 +28,7 @@ dependencies {
     implementation 'com.loopj.android:android-async-http:1.4.9'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'de.greenrobot:eventbus:2.4.0'
+    implementation 'com.j256.ormlite:ormlite-android:4.48'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

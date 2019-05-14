@@ -1,8 +1,6 @@
 package com.yadoms.widgets.statedisplay;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,42 +18,31 @@ import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.ContentType;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
-public class YadomsRestClient
+class YadomsRestClient
 {
     private final String baseUrl;
     private final Context context;
-
-    YadomsRestClient(Context context)
-    {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        String yadomsServerAddress = prefs.getString("server_url", null);
-        String yadomsServerPort = prefs.getString("server_port", "8080");
-
-        if (yadomsServerAddress == null || yadomsServerAddress.isEmpty()
-            || yadomsServerPort == null || yadomsServerPort.isEmpty())
-            throw new InvalidConfigurationException("server_url or server_port not defined");
-
-        baseUrl = "http://" + yadomsServerAddress.trim() + ":" + yadomsServerPort.trim();
-
-        boolean yadomsBasicAuthenticationEnable = prefs.getBoolean("basic_authentication", false);
-        String basicAuthenticationUsername = prefs.getString("basic_authentication_username", null);
-        String basicAuthenticationPassword = prefs.getString("basic_authentication_password", null);
-
-        if (yadomsBasicAuthenticationEnable)
-        {
-            client.setBasicAuth(basicAuthenticationUsername, basicAuthenticationPassword);
-        }
-        this.context = context;
-    }
-
     private AsyncHttpClient client = new AsyncHttpClient();
+
+    YadomsRestClient(Context context) throws InvalidConfigurationException
+    {
+        this.context = context;
+
+        MainPreferences mainPreferences = MainPreferences.get(context);
+        baseUrl = mainPreferences.getServerBaseUrl();
+
+        if (mainPreferences.basicAuthenticationEnable)
+        {
+            client.setBasicAuth(mainPreferences.basicAuthenticationUsername,
+                    mainPreferences.basicAuthenticationPassword);
+        }
+    }
 
     private void get(String url,
                      String params,
                      AsyncHttpResponseHandler responseHandler)
     {
-        Log.d("YadomsRestClient", "GET : " + url + ", params : " + (params != null ? params : ""));
+        Log.d(getClass().getSimpleName(), "GET : " + url + ", params : " + (params != null ? params : ""));
         client.get(context,
                    getAbsoluteUrl(url),
                    new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
@@ -67,7 +54,7 @@ public class YadomsRestClient
                       String params,
                       AsyncHttpResponseHandler responseHandler)
     {
-        Log.d("YadomsRestClient", "POST : " + url + ", params : " + (params != null ? params : ""));
+        Log.d(getClass().getSimpleName(), "POST : " + url + ", params : " + (params != null ? params : ""));
         client.post(context,
                     getAbsoluteUrl(url),
                     new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
@@ -79,7 +66,7 @@ public class YadomsRestClient
                                     String requestName,
                                     Throwable error)
     {
-        Log.e("yadomsRestClient",
+        Log.e(getClass().getSimpleName(),
                 requestName + " : onFailure, statusCode = " + statusCode + ", " + error);
 
         switch (statusCode)
@@ -112,7 +99,7 @@ public class YadomsRestClient
                                       Header[] headers,
                                       JSONObject response)
                 {
-                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
+                    Log.d(getClass().getSimpleName(), "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                     try
                     {
                         if (!response.getString("result").equals("true"))
@@ -131,7 +118,7 @@ public class YadomsRestClient
                     }
                     catch (JSONException e)
                     {
-                        Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
+                        Log.w(getClass().getSimpleName(), "Fail to parse /rest/device answer");
                         responseHandler.onFailure();
                     }
                 }
@@ -143,7 +130,7 @@ public class YadomsRestClient
                                       JSONObject errorResponse)
                 {
                     processHttpFailure(statusCode,
-                            "getAllDevices",
+                            getClass().getSimpleName(),
                                        error);
                     responseHandler.onFailure();
                 }
@@ -163,7 +150,7 @@ public class YadomsRestClient
                                       Header[] headers,
                                       JSONObject response)
                 {
-                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
+                    Log.d(getClass().getSimpleName(), "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                     try
                     {
                         if (!response.getString("result").equals("true"))
@@ -182,7 +169,7 @@ public class YadomsRestClient
                     }
                     catch (JSONException e)
                     {
-                        Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
+                        Log.w(getClass().getSimpleName(), "Fail to parse /rest/device answer");
                         responseHandler.onFailure();
                     }
                 }
@@ -194,7 +181,7 @@ public class YadomsRestClient
                                       JSONObject errorResponse)
                 {
                     processHttpFailure(statusCode,
-                                       "getDevicesWithCapacity",
+                            getClass().getSimpleName(),
                                        error);
                     responseHandler.onFailure();
                 }
@@ -213,7 +200,7 @@ public class YadomsRestClient
                                       Header[] headers,
                                       JSONObject response)
                 {
-                    Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
+                    Log.d(getClass().getSimpleName(), "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                     try
                     {
                         if (!response.getString("result").equals("true"))
@@ -232,7 +219,7 @@ public class YadomsRestClient
                     }
                     catch (JSONException e)
                     {
-                        Log.w("yadomsRestClient", "Fail to parse /rest/device answer");
+                        Log.w(getClass().getSimpleName(), "Fail to parse /rest/device answer");
                         responseHandler.onFailure();
                     }
                 }
@@ -244,7 +231,7 @@ public class YadomsRestClient
                                       JSONObject errorResponse)
                 {
                     processHttpFailure(statusCode,
-                            "getDeviceKeywords",
+                            getClass().getSimpleName(),
                                        error);
                     responseHandler.onFailure();
                 }
@@ -263,7 +250,7 @@ public class YadomsRestClient
                                           Header[] headers,
                                           JSONObject response)
                     {
-                        Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
+                        Log.d(getClass().getSimpleName(), "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                         try
                         {
                             if (!response.getString("result").equals("true"))
@@ -277,7 +264,7 @@ public class YadomsRestClient
                         }
                         catch (JSONException e)
                         {
-                            Log.w("yadomsRestClient", "Fail to parse /rest/device/keyword answer");
+                            Log.w(getClass().getSimpleName(), "Fail to parse /rest/device/keyword answer");
                             responseHandler.onFailure();
                         }
                     }
@@ -289,7 +276,7 @@ public class YadomsRestClient
                                           JSONObject errorResponse)
                     {
                         processHttpFailure(statusCode,
-                                "getKeywordLastValue",
+                                getClass().getSimpleName(),
                                 error);
                         responseHandler.onFailure();
                     }
@@ -319,7 +306,7 @@ public class YadomsRestClient
                                        Header[] headers,
                                        JSONObject response)
                  {
-                     Log.d("yadomsRestClient", "onSuccess, statusCode = " + statusCode + ", " + response.toString());
+                     Log.d(getClass().getSimpleName(), "onSuccess, statusCode = " + statusCode + ", " + response.toString());
                      responseHandler.onSuccess();
                  }
 
@@ -330,12 +317,55 @@ public class YadomsRestClient
                                        JSONObject errorResponse)
                  {
                      processHttpFailure(statusCode,
-                             "command",
+                             getClass().getSimpleName(),
                                         error);
                      responseHandler.onFailure();
                  }
              });
 
+    }
+
+    void getLastEvent(final YadomsRestGetResponseHandler responseHandler)
+    {
+        get("/rest/eventLogger/last",
+                "",
+                new JsonHttpResponseHandler()
+                {
+                    @Override
+                    public void onSuccess(int statusCode,
+                                          Header[] headers,
+                                          JSONObject response)
+                    {
+                        Log.d(getClass().getSimpleName(), "onSuccess, statusCode = " + statusCode + ", " + response.toString());
+                        try
+                        {
+                            if (!response.getString("result").equals("true"))
+                            {
+                                throw new RuntimeException("Yadoms returned error");
+                            }
+
+//TODO
+                            responseHandler.onSuccess(null);
+                        }
+                        catch (JSONException e)
+                        {
+                            Log.w(getClass().getSimpleName(), "Fail to parse rest/eventLogger/last answer");
+                            responseHandler.onFailure();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode,
+                                          Header[] headers,
+                                          Throwable error,
+                                          JSONObject errorResponse)
+                    {
+                        processHttpFailure(statusCode,
+                                getClass().getSimpleName(),
+                                error);
+                        responseHandler.onFailure();
+                    }
+                });
     }
 
     private String getAbsoluteUrl(String relativeUrl)

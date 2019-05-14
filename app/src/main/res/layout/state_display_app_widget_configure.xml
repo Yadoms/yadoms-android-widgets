@@ -23,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
+        android:autofillHints="AUTOFILL_HINT_USERNAME"
         android:hint="@string/yadoms_server_login"/>
 
     <EditText
@@ -30,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
+        android:autofillHints="AUTOFILL_HINT_PASSWORD"
         android:hint="@string/yadoms_server_password"/>
 
     <Button

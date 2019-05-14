@@ -8,6 +8,11 @@ import android.content.Intent;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
+import android.widget.Toast;
+
+import com.yadoms.widgets.statedisplay.preferences.DatabaseHelper;
+
+import java.sql.SQLException;
 
 /**
  * Implementation of App Widget functionality.
@@ -26,16 +31,27 @@ public class SwitchAppWidget
 
     private static SparseBooleanArray currentState = new SparseBooleanArray();
 
+    private static DatabaseHelper DatabaseHelper;
+
     static void updateAppWidget(Context context,
                                 AppWidgetManager appWidgetManager,
                                 int appWidgetId)
     {
-        widgetPrefs prefs = new widgetPrefs(context, appWidgetId);
+        Widget widget;
+        try
+        {
+            widget = getDatabaseHelper(context).getWidget(appWidgetId);
+        }
+        catch (InvalidConfigurationException e)
+        {
+            Log.w(SwitchAppWidget.class.getSimpleName(), "Fail to update widget : widget not found in database");
+            widget = new Widget(appWidgetId, 0, "");
+        }
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
         views.setTextViewText(R.id.appwidget_label,
-                              (prefs.label != null && !prefs.label.isEmpty()) ? prefs.label : prefs.keyword.toString());
+                              (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
 
         views.setImageViewResource(R.id.appwidget_image,
                                    currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
@@ -68,7 +84,7 @@ public class SwitchAppWidget
                 currentState.put(widgetId, !(currentState.get(widgetId)));
 
                 YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
-                yadomsRestClient.command(new widgetPrefs(context, widgetId).keyword,
+                yadomsRestClient.command(getDatabaseHelper(context).getWidget(widgetId).keywordId,
                         currentState.get(widgetId),
                         new YadomsRestCommandResponseHandler(){
                             @Override
@@ -81,7 +97,6 @@ public class SwitchAppWidget
             else if(intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION))
             {
                 final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
-                final int keywordId = intent.getIntExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, 0);
                 final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
                 currentState.put(widgetId, !value.equals("0"));
                 onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
@@ -89,7 +104,7 @@ public class SwitchAppWidget
         }
         catch (InvalidConfigurationException e)
         {
-            Log.e("onReceive", e.getMessage());
+            Log.e(getClass().getSimpleName(), e.getMessage());
         }
     }
 
@@ -110,11 +125,34 @@ public class SwitchAppWidget
                           int[] appWidgetIds)
     {
         // When the user deletes the widget, delete the preference associated with it.
+        DatabaseHelper databaseHelper = getDatabaseHelper(context);
         for (int appWidgetId : appWidgetIds)
         {
-            widgetPrefs prefs = new widgetPrefs(context, appWidgetId);
-            prefs.delete();
+            try
+            {
+                databaseHelper.deleteWidget(appWidgetId);
+            }
+            catch (SQLException e)
+            {
+                Log.w(getClass().getSimpleName(), "Fail to delete widget #" + appWidgetId);
+                e.printStackTrace();
+            }
         }
+    }
+
+    private static DatabaseHelper getDatabaseHelper(Context context)
+    {
+        if (DatabaseHelper == null)
+        {
+            try {
+                DatabaseHelper = new DatabaseHelper(context);
+            } catch (SQLException e) {
+                Toast.makeText(context,
+                        context.getString(R.string.unable_to_save_preferences),
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+        return DatabaseHelper;
     }
 
     @Override

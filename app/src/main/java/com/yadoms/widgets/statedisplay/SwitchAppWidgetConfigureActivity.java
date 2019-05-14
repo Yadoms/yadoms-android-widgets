@@ -12,6 +12,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.yadoms.widgets.statedisplay.preferences.DatabaseHelper;
+
+import java.sql.SQLException;
 
 /**
  * The configuration screen for the {@link SwitchAppWidget SwitchAppWidget} AppWidget.
@@ -30,11 +35,19 @@ public class SwitchAppWidgetConfigureActivity
         {
             final Context context = SwitchAppWidgetConfigureActivity.this;
 
-            // Save prefs
-            widgetPrefs prefs = new widgetPrefs(context, mAppWidgetId);
-            prefs.keyword = selectedKeyword.getId();
-            prefs.label = viewHolder.labelEditText.getText().toString();
-            prefs.save();
+            Widget widget = new Widget(mAppWidgetId,
+                    selectedKeyword.getId(),
+                    viewHolder.labelEditText.getText().toString());
+
+            // Save
+            try {
+                DatabaseHelper databaseHelper = new DatabaseHelper(context);
+                databaseHelper.saveWidget(widget);
+            } catch (SQLException e) {
+                Toast.makeText(context,
+                        context.getString(R.string.unable_to_save_preferences),
+                        Toast.LENGTH_LONG).show();
+            }
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);

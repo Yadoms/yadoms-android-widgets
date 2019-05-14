@@ -7,20 +7,17 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
+import com.yadoms.widgets.statedisplay.preferences.DatabaseHelper;
+
+import java.sql.SQLException;
 import java.util.Set;
 
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_KEYWORD_ID;
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_VALUE;
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_WIDGET_ID;
 import static com.yadoms.widgets.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDATE_ACTION;
-import static com.yadoms.widgets.statedisplay.widgetPrefs.PREF_PREFIX_KEY;
 
 public class ReadWidgetsStateJobService extends JobService {
 
@@ -52,22 +49,17 @@ public class ReadWidgetsStateJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
-        try {
-            YadomsRestClient yadomsRestClient = new YadomsRestClient(getApplicationContext());
+        try
+        {
+            final DatabaseHelper databaseHelper = new DatabaseHelper(getApplicationContext());
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Map<String, ?> allPrefs = prefs.getAll();
-
-            Set<Integer> listenKeywords = new HashSet<>();
-            for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                if (entry.getKey().matches(PREF_PREFIX_KEY + "\\d+" + "_keyword")) {
-                    listenKeywords.add((Integer)entry.getValue());
-                }
-            }
+            Set<Integer> listenKeywords = databaseHelper.getAllKeywords();
             if (listenKeywords.isEmpty()) {
-                Log.d("UpdateWidgetsService", "No more keyword to monitor. Service stopped.");
+                Log.d("UpdateWidgetsService", "No keyword to monitor. Service stopped.");
                 return false;
             }
+
+            YadomsRestClient yadomsRestClient = new YadomsRestClient(getApplicationContext());
 
             for (final int keywordId : listenKeywords) {
                 yadomsRestClient.getKeywordLastValue(keywordId, new YadomsRestGetResponseHandler(){
@@ -76,7 +68,7 @@ public class ReadWidgetsStateJobService extends JobService {
                     {
                         final String lastValue = ((String[]) objects)[0];
 
-                        ArrayList<Integer> widgetsId = Util.findWidgetsUsingKeyword(getApplicationContext(), keywordId);
+                        Set<Integer> widgetsId = databaseHelper.getWidgetsFromKeyword(keywordId);
                         for (int widgetId : widgetsId) {
                             Intent intent = new Intent(getApplicationContext(), SwitchAppWidget.class);
                             intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
@@ -96,9 +88,16 @@ public class ReadWidgetsStateJobService extends JobService {
             start(getApplicationContext());
             return true;
         }
+        catch (SQLException e)
+        {
+            Log.d(getClass().getSimpleName(), "Invalid configuration. Service stopped.");
+            e.printStackTrace();
+            return false;
+        }
         catch (InvalidConfigurationException e)
         {
-            Log.d("UpdateWidgetsService", "Invalid configuration. Service stopped.");
+            Log.d(getClass().getSimpleName(), "Invalid configuration. Service stopped.");
+            e.printStackTrace();
             return false;
         }
     }

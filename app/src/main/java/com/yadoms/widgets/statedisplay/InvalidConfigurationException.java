@@ -1,7 +1,9 @@
 package com.yadoms.widgets.statedisplay;
 
-class InvalidConfigurationException extends RuntimeException {
-    InvalidConfigurationException(String message) {
+public class InvalidConfigurationException extends Throwable
+{
+    public InvalidConfigurationException(String message)
+    {
         super(message);
     }
 }
