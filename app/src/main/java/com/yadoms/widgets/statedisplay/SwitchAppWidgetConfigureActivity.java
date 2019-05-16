@@ -59,7 +59,10 @@ public class SwitchAppWidgetConfigureActivity
             setResult(RESULT_OK, resultValue);
 
             // Start monitoring widget state (if not already started)
-            ReadWidgetsStateJobService.start(getApplicationContext());
+            if (ScreenStateReceiver.userIsPresent())
+            {
+                ReadWidgetsStateWorker.startService();
+            }
 
             finish();
         }

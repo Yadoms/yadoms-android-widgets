@@ -1,12 +1,13 @@
 package com.yadoms.widgets.statedisplay;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.ResponseHandlerInterface;
+import com.loopj.android.http.SyncHttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +23,7 @@ class YadomsRestClient
 {
     private final String baseUrl;
     private final Context context;
-    private AsyncHttpClient client = new AsyncHttpClient();
+    private SyncHttpClient client = new SyncHttpClient();
 
     YadomsRestClient(Context context) throws InvalidConfigurationException
     {
@@ -38,28 +39,38 @@ class YadomsRestClient
         }
     }
 
-    private void get(String url,
-                     String params,
-                     AsyncHttpResponseHandler responseHandler)
+    private void get(final String url,
+                     final String params,
+                     final ResponseHandlerInterface responseHandler)
     {
         Log.d(getClass().getSimpleName(), "GET : " + url + ", params : " + (params != null ? params : ""));
-        client.get(context,
-                   getAbsoluteUrl(url),
-                   new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
-                   "application/json;charset=UTF-8",
-                   responseHandler);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                client.get(context,
+                        getAbsoluteUrl(url),
+                        new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
+                        "application/json;charset=UTF-8",
+                        responseHandler);
+            }
+        });
     }
 
-    private void post(String url,
-                      String params,
-                      AsyncHttpResponseHandler responseHandler)
-    {
+    private void post(final String url,
+                      final String params,
+                      final ResponseHandlerInterface responseHandler) {
         Log.d(getClass().getSimpleName(), "POST : " + url + ", params : " + (params != null ? params : ""));
-        client.post(context,
-                    getAbsoluteUrl(url),
-                    new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
-                    "application/json;charset=UTF-8",
-                    responseHandler);
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                client.post(context,
+                        getAbsoluteUrl(url),
+                        new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
+                        "application/json;charset=UTF-8",
+                        responseHandler);
+            }
+        });
+        Log.d(getClass().getSimpleName(), "OnUIThread");
     }
 
     private void processHttpFailure(int statusCode,
@@ -282,7 +293,6 @@ class YadomsRestClient
                     }
                 });
     }
-
 
     void command(int keywordId,
                  boolean command,

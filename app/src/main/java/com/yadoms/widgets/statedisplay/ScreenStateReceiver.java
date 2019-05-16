@@ -4,8 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 public class ScreenStateReceiver extends BroadcastReceiver {
+
+    private static boolean userIsPresent;
 
     public static void start(Context applicationContext) {
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
@@ -19,14 +22,27 @@ public class ScreenStateReceiver extends BroadcastReceiver {
         applicationContext.registerReceiver(receiver, filter);
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
+    public static boolean userIsPresent() {
+        return userIsPresent;
+    }
 
-        if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-            ReadWidgetsStateJobService.notifyScreenOn(context, false);
+    @Override
+    public void onReceive(Context context, Intent intent)
+    {
+        if (intent.getAction() == null)
+            return;
+
+        if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
+        {
+            Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is OFF");
+            userIsPresent = false;
+            ReadWidgetsStateWorker.stopService();
         }
-        if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
-            ReadWidgetsStateJobService.notifyScreenOn(context, true);
+        if (intent.getAction().equals(Intent.ACTION_USER_PRESENT))
+        {
+            Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is ON and user is present");
+            userIsPresent = true;
+            ReadWidgetsStateWorker.startService();
         }
     }
 }
