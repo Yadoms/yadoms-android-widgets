@@ -107,7 +107,8 @@ public class SwitchAppWidget
                 final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
                 final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
                 currentState.put(widgetId, !value.equals("0"));
-                onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+
+                updateAppWidget(context, AppWidgetManager.getInstance(context), widgetId);
             }
         }
         catch (InvalidConfigurationException e)

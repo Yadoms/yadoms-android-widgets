@@ -6,6 +6,8 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+//TODO ajouter le support du français
+
 public class MainActivity
         extends AppCompatActivity
 {

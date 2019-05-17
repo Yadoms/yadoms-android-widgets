@@ -86,9 +86,9 @@ public class ReadWidgetsStateWorker extends Worker
             final boolean[] success = new boolean[1];
             for (final int keywordId : listenKeywords)
             {
-                final Semaphore semaphore = new Semaphore(1);
+                final Semaphore semaphore = new Semaphore(1);//TODO encore nécessaire ?
                 semaphore.acquire();
-                yadomsRestClient.getKeywordLastValue(keywordId, new YadomsRestGetResponseHandler()
+                yadomsRestClient.getKeywordLastValue(keywordId, new YadomsRestGetResponseHandler()//TODO utiliser la requête getKeywordListLastData
                 {
                     @Override
                     void onSuccess(Object[] objects)
@@ -178,4 +178,6 @@ public class ReadWidgetsStateWorker extends Worker
         WorkInfo.State state = status.get(0).getState();
         return state == WorkInfo.State.ENQUEUED || state == WorkInfo.State.BLOCKED || state == WorkInfo.State.RUNNING;
     }
+
+    //TODO ajouter la surveillance de la présence du réseau
 }
