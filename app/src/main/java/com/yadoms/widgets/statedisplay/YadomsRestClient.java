@@ -1,7 +1,6 @@
 package com.yadoms.widgets.statedisplay;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -44,32 +43,22 @@ class YadomsRestClient
                      final ResponseHandlerInterface responseHandler)
     {
         Log.d(getClass().getSimpleName(), "GET : " + url + ", params : " + (params != null ? params : ""));
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                client.get(context,
+        client.get(context,
                         getAbsoluteUrl(url),
                         new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
                         "application/json;charset=UTF-8",
                         responseHandler);
-            }
-        });
     }
 
     private void post(final String url,
                       final String params,
                       final ResponseHandlerInterface responseHandler) {
         Log.d(getClass().getSimpleName(), "POST : " + url + ", params : " + (params != null ? params : ""));
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
                 client.post(context,
                         getAbsoluteUrl(url),
                         new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
                         "application/json;charset=UTF-8",
                         responseHandler);
-            }
-        });
         Log.d(getClass().getSimpleName(), "OnUIThread");
     }
 

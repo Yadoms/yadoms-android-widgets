@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
@@ -83,16 +84,23 @@ public class SwitchAppWidget
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
                 currentState.put(widgetId, !(currentState.get(widgetId)));
 
-                YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
-                yadomsRestClient.command(getDatabaseHelper(context).getWidget(widgetId).keywordId,
-                        currentState.get(widgetId),
-                        new YadomsRestCommandResponseHandler(){
-                            @Override
-                            public void onSuccess()
-                            {
-                                onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
-                            }
-                        });
+                final YadomsRestClient yadomsRestClient = new YadomsRestClient(context.getApplicationContext());
+                final int keywordId = getDatabaseHelper(context).getWidget(widgetId).keywordId;
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        yadomsRestClient.command(keywordId,
+                                currentState.get(widgetId),
+                                new YadomsRestCommandResponseHandler(){
+                                    @Override
+                                    public void onSuccess()
+                                    {
+                                        onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+                                    }
+                                });
+                    }
+                });
+
             }
             else if(intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION))
             {
@@ -148,7 +156,7 @@ public class SwitchAppWidget
                 DatabaseHelper = new DatabaseHelper(context);
             } catch (SQLException e) {
                 Toast.makeText(context,
-                        context.getString(R.string.unable_to_save_preferences),
+                        context.getString(R.string.unable_to_access_configuration),
                         Toast.LENGTH_LONG).show();
             }
         }

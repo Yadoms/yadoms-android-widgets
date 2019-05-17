@@ -77,5 +77,6 @@
     <string name="notification_title">Yadoms is running</string>
     <string name="notification_message">Yadoms is running. Tap to access settings.</string>
     <string name="ticker_text">ticker_text</string>
-    <string name="unable_to_save_preferences">Unable to save preferences</string>
+    <string name="unable_to_access_configuration">Unable to access configuration</string>
+    <string name="unable_to_save_configuration">Unable to save configuration</string>
 </resources>
