@@ -59,7 +59,6 @@ class YadomsRestClient
                         new StringEntity(params != null ? params : "", ContentType.APPLICATION_JSON),
                         "application/json;charset=UTF-8",
                         responseHandler);
-        Log.d(getClass().getSimpleName(), "OnUIThread");
     }
 
     private void processHttpFailure(int statusCode,

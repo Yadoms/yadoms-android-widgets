@@ -32,6 +32,7 @@ public class ReadWidgetsStateWorker extends Worker
     private static final String UNIQUE_WORK_NAME = ReadWidgetsStateWorker.class.getSimpleName() + "WorkName";
     private static final int SERVER_POLL_PERIOD_SECONDS = 10;
     private static final int SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS = 60;
+    private boolean connected = false;
 
     public ReadWidgetsStateWorker(@NonNull Context context,
                                   @NonNull WorkerParameters params)
@@ -45,14 +46,17 @@ public class ReadWidgetsStateWorker extends Worker
         switch(readWidgets(getApplicationContext()))
         {
             case SUCCESS: {
+                connected = true;
                 restart(SERVER_POLL_PERIOD_SECONDS);
                 return Result.success();
             }
             case INVALID_CONFIGURATION: {
+                connected = false;
                 // No restart
                 return Result.failure();
             }
             case CONNECTION_FAILED: {
+                connected = false;
                 restart(SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS);
                 return Result.failure();
             }
@@ -181,3 +185,4 @@ public class ReadWidgetsStateWorker extends Worker
 
     //TODO ajouter la surveillance de la présence du réseau
 }
+
