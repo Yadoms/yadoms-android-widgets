@@ -39,6 +39,10 @@ class MainPreferences
         return MainPreferences;
     }
 
+    static void invalid() {
+        MainPreferences = null;
+    }
+
     String getServerBaseUrl()
     {
         //TODO les trim devraient être à la saisie

@@ -14,8 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity
         extends AppCompatActivity {
-    YadomsRestClient client = null;
-
     Handler checkConnectionTimerHandler = new Handler();
     Runnable checkConnectionTimerRunnable = new Runnable() {
         @Override
@@ -31,36 +29,30 @@ public class MainActivity
 
         ScreenStateReceiver.start(getApplicationContext());
 
-        checkConnected();
-
         ReadWidgetsStateWorker.startService();
     }
 
     private void checkConnected() {
-        // TODO ne se connecte pas après données de l'appli effacées
-        if (client == null) {
-            try {
-                client = new YadomsRestClient(this);
-            } catch (InvalidConfigurationException ignored) {
-                onConnectionEvent(false);
-                return;
-            }
-        }
-
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                client.getLastEvent(new YadomsRestGetResponseHandler() {
-                    @Override
-                    void onSuccess(Object[] objects) {
-                        onConnectionEvent(true);
-                    }
+                try {
+                    YadomsRestClient client = new YadomsRestClient(getApplicationContext());
+                    client.withTimeout(2000);
+                    client.getLastEvent(new YadomsRestGetResponseHandler() {
+                        @Override
+                        void onSuccess(Object[] objects) {
+                            onConnectionEvent(true);
+                        }
 
-                    @Override
-                    void onFailure() {
-                        onConnectionEvent(false);
-                    }
-                });
+                        @Override
+                        void onFailure() {
+                            onConnectionEvent(false);
+                        }
+                    });
+                } catch (InvalidConfigurationException ignored) {
+                    onConnectionEvent(false);
+                }
             }
         });
     }
@@ -77,7 +69,7 @@ public class MainActivity
                 textView.setTextColor(connected ? Color.GREEN : Color.RED);
                 textView.setText(connected ? R.string.connection_ok : R.string.connection_failed);//TODO corriger les couleurs
 
-                checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, 1000);
+                checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, 2000);
             }
         });
 
@@ -86,6 +78,8 @@ public class MainActivity
     @Override
     protected void onResume() {
         super.onResume();
+        MainPreferences.invalid();
+        checkConnected();
     }
 
     @Override
