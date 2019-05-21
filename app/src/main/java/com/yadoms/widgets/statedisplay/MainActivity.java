@@ -66,8 +66,8 @@ public class MainActivity
             @Override
             public void run() {
                 TextView textView = findViewById(R.id.connectionStateText);
-                textView.setTextColor(connected ? Color.GREEN : Color.RED);
-                textView.setText(connected ? R.string.connection_ok : R.string.connection_failed);//TODO corriger les couleurs
+                textView.setTextColor(connected ? getResources().getColor(R.color.colorAccent, getTheme()) : Color.RED);
+                textView.setText(connected ? R.string.connection_ok : R.string.connection_failed);
 
                 checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, 2000);
             }
