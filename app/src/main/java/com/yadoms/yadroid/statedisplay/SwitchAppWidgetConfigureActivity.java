@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.yadroid.statedisplay;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -15,7 +15,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.yadoms.widgets.statedisplay.preferences.DatabaseHelper;
+import com.yadoms.yadroid.statedisplay.preferences.DatabaseHelper;
 
 import java.sql.SQLException;
 
@@ -24,7 +24,7 @@ import java.sql.SQLException;
  */
 public class SwitchAppWidgetConfigureActivity
         extends Activity {
-    int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    int appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     private Keyword selectedKeyword;
 
     ViewHolder viewHolder;
@@ -33,7 +33,7 @@ public class SwitchAppWidgetConfigureActivity
         public void onClick(View v) {
             final Context context = SwitchAppWidgetConfigureActivity.this;
 
-            Widget widget = new Widget(mAppWidgetId,
+            Widget widget = new Widget(appWidgetId,
                     selectedKeyword.getId(),
                     viewHolder.labelEditText.getText().toString());
 
@@ -49,11 +49,11 @@ public class SwitchAppWidgetConfigureActivity
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            SwitchAppWidget.updateAppWidget(context, appWidgetManager, mAppWidgetId);
+            SwitchAppWidget.updateAppWidget(context, appWidgetManager, appWidgetId);
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
 
             // Start monitoring widget state (if not already started)
@@ -83,12 +83,12 @@ public class SwitchAppWidgetConfigureActivity
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            mAppWidgetId = extras.getInt(
+            appWidgetId = extras.getInt(
                     AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
         // If this activity was started with an intent without an app widget ID, finish with an error.
-        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
         }
 

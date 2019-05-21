@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.yadroid.statedisplay;
 
 import android.content.Intent;
 import android.graphics.Color;

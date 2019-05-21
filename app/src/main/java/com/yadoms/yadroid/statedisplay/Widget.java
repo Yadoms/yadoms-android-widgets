@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.yadroid.statedisplay;
 
 public class Widget
 {

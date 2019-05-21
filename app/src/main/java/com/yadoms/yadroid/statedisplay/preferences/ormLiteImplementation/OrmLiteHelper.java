@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay.preferences.ormLiteImplementation;
+package com.yadoms.yadroid.statedisplay.preferences.ormLiteImplementation;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -9,7 +9,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.yadoms.widgets.statedisplay.Widget;
+import com.yadoms.yadroid.statedisplay.Widget;
 
 import java.sql.SQLException;
 

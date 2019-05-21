@@ -12,7 +12,6 @@
         android:id="@+id/appwidget_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription="@+id/appwidget_label"
         android:padding="5dp"
         android:tint="@color/colorAccent"
         app:srcCompat="@drawable/application_logo" />

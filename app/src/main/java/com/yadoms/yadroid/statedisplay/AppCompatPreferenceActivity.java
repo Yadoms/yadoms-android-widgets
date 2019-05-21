@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.yadroid.statedisplay;
 
 import android.content.res.Configuration;
 import android.os.Bundle;

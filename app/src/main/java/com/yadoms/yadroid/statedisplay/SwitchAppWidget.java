@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.yadroid.statedisplay;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -11,7 +11,7 @@ import android.util.SparseBooleanArray;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import com.yadoms.widgets.statedisplay.preferences.DatabaseHelper;
+import com.yadoms.yadroid.statedisplay.preferences.DatabaseHelper;
 
 import java.sql.SQLException;
 
@@ -46,7 +46,7 @@ public class SwitchAppWidget
         catch (InvalidConfigurationException e)
         {
             Log.w(SwitchAppWidget.class.getSimpleName(), "Fail to update widget : widget not found in database");
-            widget = new Widget(appWidgetId, 0, "");
+            return;
         }
 
         // Construct the RemoteViews object
@@ -75,8 +75,6 @@ public class SwitchAppWidget
     public void onReceive(final Context context,
                           Intent intent)
     {
-        super.onReceive(context, intent);
-
         try
         {
             if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION))
@@ -110,6 +108,8 @@ public class SwitchAppWidget
 
                 updateAppWidget(context, AppWidgetManager.getInstance(context), widgetId);
             }
+
+            super.onReceive(context, intent);
         }
         catch (InvalidConfigurationException e)
         {

@@ -1,12 +1,12 @@
-package com.yadoms.widgets.statedisplay.preferences;
+package com.yadoms.yadroid.statedisplay.preferences;
 
 import android.content.Context;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RawRowMapper;
-import com.yadoms.widgets.statedisplay.InvalidConfigurationException;
-import com.yadoms.widgets.statedisplay.Widget;
-import com.yadoms.widgets.statedisplay.preferences.ormLiteImplementation.OrmLiteHelper;
+import com.yadoms.yadroid.statedisplay.InvalidConfigurationException;
+import com.yadoms.yadroid.statedisplay.Widget;
+import com.yadoms.yadroid.statedisplay.preferences.ormLiteImplementation.OrmLiteHelper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

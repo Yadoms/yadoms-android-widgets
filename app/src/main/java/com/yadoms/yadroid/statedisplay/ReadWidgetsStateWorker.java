@@ -1,4 +1,4 @@
-package com.yadoms.widgets.statedisplay;
+package com.yadoms.yadroid.statedisplay;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +14,7 @@ import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.yadoms.widgets.statedisplay.preferences.DatabaseHelper;
+import com.yadoms.yadroid.statedisplay.preferences.DatabaseHelper;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -22,10 +22,10 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_KEYWORD_ID;
-import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_VALUE;
-import static com.yadoms.widgets.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_WIDGET_ID;
-import static com.yadoms.widgets.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDATE_ACTION;
+import static com.yadoms.yadroid.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_KEYWORD_ID;
+import static com.yadoms.yadroid.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_VALUE;
+import static com.yadoms.yadroid.statedisplay.SwitchAppWidget.REMOTE_UPDATE_ACTION_WIDGET_ID;
+import static com.yadoms.yadroid.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDATE_ACTION;
 
 public class ReadWidgetsStateWorker extends Worker
 {
