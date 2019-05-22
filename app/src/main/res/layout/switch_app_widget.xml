@@ -11,7 +11,7 @@
         android:layout_height="50dp"
         android:contentDescription="@+id/appwidget_label"
         android:padding="5dp"
-        android:src="@drawable/ic_baseline_toggle_off_24px"
+        android:src="@mipmap/ic_baseline_toggle_off"
         android:tint="@color/colorAccent"/>
 
     <TextView

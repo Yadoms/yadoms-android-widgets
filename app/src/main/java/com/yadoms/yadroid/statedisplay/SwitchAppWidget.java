@@ -6,13 +6,16 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.yadoms.yadroid.statedisplay.preferences.DatabaseHelper;
 
+import java.security.InvalidParameterException;
 import java.sql.SQLException;
 
 /**
@@ -20,8 +23,7 @@ import java.sql.SQLException;
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
  */
 public class SwitchAppWidget
-        extends AppWidgetProvider
-{
+        extends AppWidgetProvider {
     public static String CLICK_ON_WIDGET_ACTION = "ClickOnWidgetAction";
     public static String WIDGET_ACTION_WIDGET_ID = "WidgetId";
 
@@ -36,15 +38,11 @@ public class SwitchAppWidget
 
     static void updateAppWidget(Context context,
                                 AppWidgetManager appWidgetManager,
-                                int appWidgetId)
-    {
+                                int appWidgetId) {
         Widget widget;
-        try
-        {
+        try {
             widget = getDatabaseHelper(context).getWidget(appWidgetId);
-        }
-        catch (InvalidConfigurationException e)
-        {
+        } catch (InvalidConfigurationException e) {
             Log.w(SwitchAppWidget.class.getSimpleName(), "Fail to update widget : widget not found in database");
             return;
         }
@@ -52,10 +50,10 @@ public class SwitchAppWidget
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
         views.setTextViewText(R.id.appwidget_label,
-                              (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
+                (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
 //TODO corriger les glitchs 'Unknown' sur le label
-//        views.setImageViewResource(R.id.appwidget_image,
-//                                   currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
+        views.setImageViewResource(R.id.appwidget_image,
+                currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
 
         //TODO dans le service, mettre un listener sur les préférences pour mettre à jour la liste de KW à s'inscrire
 //        if (prefs.keyword != 0)
@@ -71,14 +69,29 @@ public class SwitchAppWidget
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+    private static int translateResourceImage(int id) {
+        // Translate resource image to use vector image for SDK >= 26 and mipmap for older SDK
+        // Needed by widgets as ImageView before SDK 26 doesn't support vector images
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            return id;
+        }
+
+        final SparseIntArray imagesResourceIdMap = new SparseIntArray();
+        imagesResourceIdMap.put(R.drawable.ic_baseline_toggle_off_24px, R.mipmap.ic_baseline_toggle_off);
+        imagesResourceIdMap.put(R.drawable.ic_baseline_toggle_on_24px, R.mipmap.ic_baseline_toggle_on);
+
+        int returnedId = imagesResourceIdMap.get(id, -1);
+        if (returnedId == -1)
+            throw new InvalidParameterException("Image resource ID not found");
+        return returnedId;
+    }
+
     @Override
     public void onReceive(final Context context,
-                          Intent intent)
-    {
-        try
-        {
-            if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION))
-            {
+                          Intent intent) {
+        try {
+            if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION)) {
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
                 currentState.put(widgetId, !(currentState.get(widgetId)));
 
@@ -89,19 +102,16 @@ public class SwitchAppWidget
                     public void run() {
                         yadomsRestClient.command(keywordId,
                                 currentState.get(widgetId),
-                                new YadomsRestCommandResponseHandler(){
+                                new YadomsRestCommandResponseHandler() {
                                     @Override
-                                    public void onSuccess()
-                                    {
+                                    public void onSuccess() {
                                         onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
                                     }
                                 });
                     }
                 });
 
-            }
-            else if(intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION))
-            {
+            } else if (intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION)) {
                 final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
                 final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
                 currentState.put(widgetId, !value.equals("0"));
@@ -110,9 +120,7 @@ public class SwitchAppWidget
             }
 
             super.onReceive(context, intent);
-        }
-        catch (InvalidConfigurationException e)
-        {
+        } catch (InvalidConfigurationException e) {
             Log.e(getClass().getSimpleName(), e.getMessage());
         }
     }
@@ -120,39 +128,30 @@ public class SwitchAppWidget
     @Override
     public void onUpdate(Context context,
                          AppWidgetManager appWidgetManager,
-                         int[] appWidgetIds)
-    {
+                         int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds)
-        {
+        for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
     }
 
     @Override
     public void onDeleted(Context context,
-                          int[] appWidgetIds)
-    {
+                          int[] appWidgetIds) {
         // When the user deletes the widget, delete the preference associated with it.
         DatabaseHelper databaseHelper = getDatabaseHelper(context);
-        for (int appWidgetId : appWidgetIds)
-        {
-            try
-            {
+        for (int appWidgetId : appWidgetIds) {
+            try {
                 databaseHelper.deleteWidget(appWidgetId);
-            }
-            catch (SQLException e)
-            {
+            } catch (SQLException e) {
                 Log.w(getClass().getSimpleName(), "Fail to delete widget #" + appWidgetId);
                 e.printStackTrace();
             }
         }
     }
 
-    private static DatabaseHelper getDatabaseHelper(Context context)
-    {
-        if (DatabaseHelper == null)
-        {
+    private static DatabaseHelper getDatabaseHelper(Context context) {
+        if (DatabaseHelper == null) {
             try {
                 DatabaseHelper = new DatabaseHelper(context);
             } catch (SQLException e) {
@@ -165,14 +164,12 @@ public class SwitchAppWidget
     }
 
     @Override
-    public void onEnabled(Context context)
-    {
+    public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
     }
 
     @Override
-    public void onDisabled(Context context)
-    {
+    public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
     }
 }
