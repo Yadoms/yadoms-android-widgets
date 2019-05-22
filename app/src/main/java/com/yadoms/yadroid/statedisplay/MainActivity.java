@@ -3,11 +3,14 @@ package com.yadoms.yadroid.statedisplay;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
 import androidx.appcompat.app.AppCompatActivity;
 
 //TODO ajouter le support du français
@@ -66,13 +69,20 @@ public class MainActivity
             @Override
             public void run() {
                 TextView textView = findViewById(R.id.connectionStateText);
-                textView.setTextColor(connected ? getResources().getColor(R.color.colorAccent, getTheme()) : Color.RED);
+                textView.setTextColor(connected ? getColorFromResource(R.color.colorAccent) : Color.RED);
                 textView.setText(connected ? R.string.connection_ok : R.string.connection_failed);
 
                 checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, 2000);
             }
         });
+    }
 
+    @ColorInt
+    private int getColorFromResource(@ColorRes int id) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            return getApplicationContext().getColor(id);
+        }
+        return getResources().getColor(id);
     }
 
     @Override

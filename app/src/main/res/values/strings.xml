@@ -80,4 +80,5 @@
     <string name="ticker_text">ticker_text</string>
     <string name="unable_to_access_configuration">Unable to access configuration</string>
     <string name="unable_to_save_configuration">Unable to save configuration</string>
+    <string name="yadoms">Yadoms</string>
 </resources>

@@ -53,9 +53,9 @@ public class SwitchAppWidget
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
         views.setTextViewText(R.id.appwidget_label,
                               (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
-
-        views.setImageViewResource(R.id.appwidget_image,
-                                   currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
+//TODO corriger les glitchs 'Unknown' sur le label
+//        views.setImageViewResource(R.id.appwidget_image,
+//                                   currentState.get(appWidgetId) ? R.drawable.ic_baseline_toggle_on_24px : R.drawable.ic_baseline_toggle_off_24px);
 
         //TODO dans le service, mettre un listener sur les préférences pour mettre à jour la liste de KW à s'inscrire
 //        if (prefs.keyword != 0)
