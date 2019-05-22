@@ -22,6 +22,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.yadoms.yadroid.statedisplay.NetworkStateReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name="com.yadoms.yadroid.statedisplay.SettingsActivity"
             android:label="@string/title_activity_settings"

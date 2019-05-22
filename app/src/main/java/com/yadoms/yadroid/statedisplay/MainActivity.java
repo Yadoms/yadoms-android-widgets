@@ -40,6 +40,11 @@ public class MainActivity
             @Override
             public void run() {
                 try {
+                    if (!NetworkStateReceiver.networkIsAvailable()) {
+                        onConnectionEvent(false);
+                        return;
+                    }
+
                     YadomsRestClient client = new YadomsRestClient(getApplicationContext());
                     client.withTimeout(2000);
                     client.getLastEvent(new YadomsRestGetResponseHandler() {

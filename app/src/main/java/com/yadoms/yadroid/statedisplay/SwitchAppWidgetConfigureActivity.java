@@ -57,7 +57,7 @@ public class SwitchAppWidgetConfigureActivity
             setResult(RESULT_OK, resultValue);
 
             // Start monitoring widget state (if not already started)
-            if (ScreenStateReceiver.userIsPresent()) {
+            if (ScreenStateReceiver.userIsPresent() && NetworkStateReceiver.networkIsAvailable()) {
                 ReadWidgetsStateWorker.startService();
             }
 

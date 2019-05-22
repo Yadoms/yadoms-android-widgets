@@ -178,7 +178,5 @@ public class ReadWidgetsStateWorker extends Worker
         WorkInfo.State state = status.get(0).getState();
         return state == WorkInfo.State.ENQUEUED || state == WorkInfo.State.BLOCKED || state == WorkInfo.State.RUNNING;
     }
-
-    //TODO ajouter la surveillance de la présence du réseau
 }
 
