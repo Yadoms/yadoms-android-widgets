@@ -30,9 +30,8 @@ import static com.yadoms.yadroid.statedisplay.SwitchAppWidget.WIDGET_REMOTE_UPDA
 public class ReadWidgetsStateWorker extends Worker
 {
     private static final String UNIQUE_WORK_NAME = ReadWidgetsStateWorker.class.getSimpleName() + "WorkName";
-    private static final int SERVER_POLL_PERIOD_SECONDS = 10;
-    private static final int SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS = 60;
-    private boolean connected = false;
+    private static final int SERVER_POLL_PERIOD_SECONDS = BuildConfig.DEBUG ? 5 : 30;
+    private static final int SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS = BuildConfig.DEBUG ? 10 : 60;
 
     public ReadWidgetsStateWorker(@NonNull Context context,
                                   @NonNull WorkerParameters params)
@@ -46,17 +45,14 @@ public class ReadWidgetsStateWorker extends Worker
         switch(readWidgets(getApplicationContext()))
         {
             case SUCCESS: {
-                connected = true;
                 restart(SERVER_POLL_PERIOD_SECONDS);
                 return Result.success();
             }
             case INVALID_CONFIGURATION: {
-                connected = false;
                 // No restart
                 return Result.failure();
             }
             case CONNECTION_FAILED: {
-                connected = false;
                 restart(SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS);
                 return Result.failure();
             }

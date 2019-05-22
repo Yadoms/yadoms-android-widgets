@@ -55,10 +55,6 @@ public class SwitchAppWidget
         views.setImageViewResource(R.id.appwidget_image,
                 currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
 
-        //TODO dans le service, mettre un listener sur les préférences pour mettre à jour la liste de KW à s'inscrire
-//        if (prefs.keyword != 0)
-//            EventBus.getDefault().post(new SubscribeToKeywordEvent(prefs.keyword));
-
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);
         intent.putExtra(WIDGET_ACTION_WIDGET_ID, appWidgetId);
