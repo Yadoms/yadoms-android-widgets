@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 import com.yadoms.widgets.R;
 import com.yadoms.widgets.application.InvalidConfigurationException;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
+import com.yadoms.widgets.shared.ResourceHelper;
 import com.yadoms.widgets.shared.Widget;
 import com.yadoms.widgets.shared.restClient.Client;
 import com.yadoms.widgets.shared.restClient.CommandResponseHandler;
@@ -60,7 +60,7 @@ public class SwitchAppWidget
 //TODO corriger les glitchs 'Unknown' sur le label
         views.setImageViewResource(R.id.appwidget_image,
                 currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
-        views.setInt(R.id.appwidget_image, "setColorFilter", currentState.get(appWidgetId) ? Color.argb(255, 255, 255, 255) : R.color.off);
+        views.setInt(R.id.appwidget_image, "setColorFilter", currentState.get(appWidgetId) ? ResourceHelper.getColorFromResource(context, R.color.yadomsOfficial : R.color.off);
 
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);
