@@ -60,7 +60,7 @@ public class SwitchAppWidget
 //TODO corriger les glitchs 'Unknown' sur le label
         views.setImageViewResource(R.id.appwidget_image,
                 currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
-        views.setInt(R.id.appwidget_image, "setColorFilter", currentState.get(appWidgetId) ? ResourceHelper.getColorFromResource(context, R.color.yadomsOfficial : R.color.off);
+        views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, currentState.get(appWidgetId) ? R.color.yadomsOfficial : R.color.off));
 
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);
