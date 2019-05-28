@@ -29,16 +29,13 @@ public class ScreenStateReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        if (intent.getAction() == null)
-            return;
-
-        if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
+        if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction()))
         {
             Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is OFF");
             userIsPresent = false;
             ReadWidgetsStateWorker.stopService();
         }
-        if (intent.getAction().equals(Intent.ACTION_USER_PRESENT))
+        if (Intent.ACTION_USER_PRESENT.equals(intent.getAction()))
         {
             Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is ON and user is present");
             userIsPresent = true;

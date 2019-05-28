@@ -16,6 +16,9 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction()))
+            return;
+
         final ConnectivityManager connMgr = (ConnectivityManager) context
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 

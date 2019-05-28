@@ -94,7 +94,7 @@ public class SwitchAppWidget
     public void onReceive(final Context context,
                           Intent intent) {
         try {
-            if (intent.getAction().equals(CLICK_ON_WIDGET_ACTION)) {
+            if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
                 currentState.put(widgetId, !(currentState.get(widgetId)));
 
@@ -114,7 +114,7 @@ public class SwitchAppWidget
                     }
                 });
 
-            } else if (intent.getAction().equals(WIDGET_REMOTE_UPDATE_ACTION)) {
+            } else if (WIDGET_REMOTE_UPDATE_ACTION.equals(intent.getAction())) {
                 final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
                 final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
                 currentState.put(widgetId, !value.equals("0"));
