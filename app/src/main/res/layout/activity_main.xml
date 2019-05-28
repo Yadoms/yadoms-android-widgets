@@ -5,14 +5,14 @@
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context="com.yadoms.widgets.application.MainActivity">
 
     <ImageView
         android:id="@+id/appwidget_image"
         android:layout_width="match_parent"
         android:layout_height="130dp"
         android:padding="5dp"
-        android:tint="@color/colorAccent"
+        android:tint="@color/yadomsOfficial"
         android:src="@drawable/application_logo"
         android:contentDescription="@string/yadoms" />
 

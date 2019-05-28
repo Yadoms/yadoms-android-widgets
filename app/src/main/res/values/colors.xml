@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#979797</color>
-    <color name="colorPrimaryDark">#444444</color>
-    <color name="colorAccent">#428BCA</color>
+    <color name="colorPrimaryDark">#68444444</color>
+    <color name="off">#68CCCCCC</color>
+    <color name="yadomsOfficial">#428BCA</color>
+    <color name="white">#FFFFFF</color>
 </resources>

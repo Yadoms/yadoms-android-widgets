@@ -12,7 +12,7 @@
         android:contentDescription="@+id/appwidget_label"
         android:padding="5dp"
         android:src="@drawable/ic_baseline_toggle_off_24px"
-        android:tint="@color/colorAccent"/>
+        android:tint="@color/off"/>
 
     <TextView
         android:id="@+id/appwidget_label"
@@ -25,7 +25,7 @@
         android:singleLine="true"
         android:text="@string/appwidget_default_text"
         android:textAlignment="gravity"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/white"
         android:textSize="12sp"/>
 
 </LinearLayout>

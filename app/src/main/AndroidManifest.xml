@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yadoms.yadroid.statedisplay">
+    package="com.yadoms.widgets">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <receiver
-            android:name="com.yadoms.yadroid.statedisplay.BootServiceReceiver"
+            android:name="com.yadoms.widgets.application.BootServiceReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -22,22 +22,22 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.yadoms.yadroid.statedisplay.NetworkStateReceiver" >
+        <receiver android:name="com.yadoms.widgets.application.NetworkStateReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
         <activity
-            android:name="com.yadoms.yadroid.statedisplay.SettingsActivity"
+            android:name="com.yadoms.widgets.application.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="com.yadoms.yadroid.statedisplay.MainActivity">
+            android:parentActivityName="com.yadoms.widgets.application.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.yadoms.yadroid.statedisplay.MainActivity" />
+                android:value="com.yadoms.widgets.application.MainActivity" />
         </activity>
 
-        <receiver android:name="com.yadoms.yadroid.statedisplay.SwitchAppWidget">
+        <receiver android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -47,12 +47,12 @@
                 android:resource="@xml/switch_app_widget_info" />
         </receiver>
 
-        <activity android:name="com.yadoms.yadroid.statedisplay.SwitchAppWidgetConfigureActivity">
+        <activity android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidgetConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
-        <activity android:name="com.yadoms.yadroid.statedisplay.MainActivity">
+        <activity android:name="com.yadoms.widgets.application.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
