@@ -15,8 +15,8 @@ import java.sql.SQLException;
 
 public class OrmLiteHelper extends OrmLiteSqliteOpenHelper {
 
-    private static final String DATABASE_NAME    = "ormlite.db";
-    private static final int    DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "ormlite.db";
+    private static final int DATABASE_VERSION = 1;
 
     private Dao<WidgetDto, Integer> m_widgetDao = null;
 
@@ -65,18 +65,25 @@ public class OrmLiteHelper extends OrmLiteSqliteOpenHelper {
 
         public static final String TABLE_NAME_WIDGETS = "widgets";
 
-        @DatabaseField(id = true)
+        public static final String FIELD_ID = "_ID";
+        @DatabaseField(id = true, columnName = FIELD_ID)
         private int widgetId;
 
-        @DatabaseField()
+        public static final String FIELD_CLASS_NAME = "CLASS_NAME";
+        @DatabaseField(columnName = FIELD_CLASS_NAME)
+        private String className;
+
+        public static final String FIELD_KEYWORD_ID = "KEYWORD_ID";
+        @DatabaseField(columnName = FIELD_KEYWORD_ID)
         private int keywordId;
 
-        @DatabaseField()
+        public static final String FIELD_LABEL = "FIELD_LABEL";
+        @DatabaseField(columnName = FIELD_LABEL)
         private String label;
 
-        public WidgetDto(Widget widget)
-        {
+        public WidgetDto(Widget widget) {
             this.widgetId = widget.id;
+            this.className = widget.className;
             this.keywordId = widget.keywordId;
             this.label = widget.label;
         }
@@ -85,20 +92,29 @@ public class OrmLiteHelper extends OrmLiteSqliteOpenHelper {
             // Empty constructor needed by ORMLite
         }
 
-        /** Getters & Setters **/
+        /**
+         * Getters & Setters
+         **/
 
         public int getWidgetId() {
             return widgetId;
         }
+
+        public String getClassName() {
+            return className;
+        }
+
         public int getKeywordId() {
             return keywordId;
         }
+
         public String getLabel() {
             return label;
         }
 
         public Widget toWidget() {
             return new Widget(widgetId,
+                    className,
                     keywordId,
                     label);
         }

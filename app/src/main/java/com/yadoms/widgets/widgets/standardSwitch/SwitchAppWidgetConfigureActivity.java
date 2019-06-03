@@ -45,6 +45,7 @@ public class SwitchAppWidgetConfigureActivity
             final Context context = SwitchAppWidgetConfigureActivity.this;
 
             Widget widget = new Widget(appWidgetId,
+                    SwitchAppWidget.class.getName(),
                     selectedKeyword.getId(),
                     viewHolder.labelEditText.getText().toString());
 

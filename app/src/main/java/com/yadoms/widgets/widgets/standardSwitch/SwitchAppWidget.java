@@ -24,6 +24,10 @@ import com.yadoms.widgets.shared.restClient.CommandResponseHandler;
 import java.security.InvalidParameterException;
 import java.sql.SQLException;
 
+import static com.yadoms.widgets.application.ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_VALUE;
+import static com.yadoms.widgets.application.ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_WIDGET_ID;
+import static com.yadoms.widgets.application.ReadWidgetsStateWorker.WIDGET_REMOTE_UPDATE_ACTION;
+
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
@@ -32,11 +36,6 @@ public class SwitchAppWidget
         extends AppWidgetProvider {
     public static String CLICK_ON_WIDGET_ACTION = "ClickOnWidgetAction";
     public static String WIDGET_ACTION_WIDGET_ID = "WidgetId";
-
-    public static String WIDGET_REMOTE_UPDATE_ACTION = "WidgetRemoteUpdateAction";
-    public static String REMOTE_UPDATE_ACTION_WIDGET_ID = "WidgetId";
-    public static String REMOTE_UPDATE_ACTION_KEYWORD_ID = "KeywordId";
-    public static String REMOTE_UPDATE_ACTION_VALUE = "Value";
 
     private static SparseBooleanArray currentState = new SparseBooleanArray();
 

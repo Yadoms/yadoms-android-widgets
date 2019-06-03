@@ -16,9 +16,9 @@ import androidx.work.WorkerParameters;
 
 import com.yadoms.widgets.BuildConfig;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
+import com.yadoms.widgets.shared.Widget;
 import com.yadoms.widgets.shared.restClient.Client;
 import com.yadoms.widgets.shared.restClient.GetResponseHandler;
-import com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -26,16 +26,17 @@ import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget.REMOTE_UPDATE_ACTION_KEYWORD_ID;
-import static com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget.REMOTE_UPDATE_ACTION_VALUE;
-import static com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget.REMOTE_UPDATE_ACTION_WIDGET_ID;
-import static com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget.WIDGET_REMOTE_UPDATE_ACTION;
-
 public class ReadWidgetsStateWorker extends Worker
 {
     private static final String UNIQUE_WORK_NAME = ReadWidgetsStateWorker.class.getSimpleName() + "WorkName";
     private static final int SERVER_POLL_PERIOD_SECONDS = BuildConfig.DEBUG ? 5 : 30;
     private static final int SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS = BuildConfig.DEBUG ? 10 : 60;
+
+    public static String WIDGET_REMOTE_UPDATE_ACTION = "WidgetRemoteUpdateAction";
+    public static String REMOTE_UPDATE_ACTION_WIDGET_ID = "WidgetId";
+    public static String REMOTE_UPDATE_ACTION_KEYWORD_ID = "KeywordId";
+    public static String REMOTE_UPDATE_ACTION_VALUE = "Value";
+
 
     public ReadWidgetsStateWorker(@NonNull Context context,
                                   @NonNull WorkerParameters params)
@@ -99,15 +100,23 @@ public class ReadWidgetsStateWorker extends Worker
                     {
                         final String lastValue = ((String[]) objects)[0];
 
-                        Set<Integer> widgetsId = databaseHelper.getWidgetsFromKeyword(keywordId);
-                        for (int widgetId : widgetsId) {
-                            Intent intent = new Intent(context, SwitchAppWidget.class);
+                        Set<Widget> widgets = databaseHelper.getWidgetsFromKeyword(keywordId);
+                        for (Widget widget : widgets) {
+                            Intent intent;
+                            try {
+                                intent = new Intent(context, Class.forName(widget.className));
+                            } catch (ClassNotFoundException e) {
+                                Log.e(ReadWidgetsStateWorker.class.getSimpleName(), "Widget class name not supported");
+                                success[0] = false;
+                                semaphore.release();
+                                return;
+                            }
                             intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
-                            intent.putExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, widgetId);
-                            intent.putExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, keywordId);
+                            intent.putExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, widget.id);
+                            intent.putExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, widget.keywordId);
                             intent.putExtra(REMOTE_UPDATE_ACTION_VALUE, lastValue);
                             context.sendBroadcast(intent);
-                            Log.d(getClass().getSimpleName(), "Widget " + widgetId + "(keyword " + keywordId + ") was updated to value " + lastValue);
+                            Log.d(getClass().getSimpleName(), "Widget " + widget.id + "(keyword " + widget.keywordId + ") was updated to value " + lastValue);
                         }
                         success[0] = true;
                         semaphore.release();
