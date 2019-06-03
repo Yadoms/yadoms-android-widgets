@@ -102,20 +102,12 @@ public class ReadWidgetsStateWorker extends Worker
 
                         Set<Widget> widgets = databaseHelper.getWidgetsFromKeyword(keywordId);
                         for (Widget widget : widgets) {
-                            Intent intent;
-                            try {
-                                intent = new Intent(context, Class.forName(widget.className));
-                            } catch (ClassNotFoundException e) {
-                                Log.e(ReadWidgetsStateWorker.class.getSimpleName(), "Widget class name not supported");
+                            if (!fireEventToWidget(context, widget, lastValue))
+                            {
                                 success[0] = false;
                                 semaphore.release();
                                 return;
                             }
-                            intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
-                            intent.putExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, widget.id);
-                            intent.putExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, widget.keywordId);
-                            intent.putExtra(REMOTE_UPDATE_ACTION_VALUE, lastValue);
-                            context.sendBroadcast(intent);
                             Log.d(getClass().getSimpleName(), "Widget " + widget.id + "(keyword " + widget.keywordId + ") was updated to value " + lastValue);
                         }
                         success[0] = true;
@@ -150,6 +142,22 @@ public class ReadWidgetsStateWorker extends Worker
             e.printStackTrace();
             return ReadWidgetsResult.INVALID_CONFIGURATION;//TODO
         }
+    }
+
+    private static Boolean fireEventToWidget(Context context, Widget widget, String lastValue) {
+        Intent intent;
+        try {
+            intent = new Intent(context, Class.forName(widget.className));
+        } catch (ClassNotFoundException e) {
+            Log.e(ReadWidgetsStateWorker.class.getSimpleName(), "Widget class name not supported");
+            return false;
+        }
+        intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
+        intent.putExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, widget.id);
+        intent.putExtra(REMOTE_UPDATE_ACTION_KEYWORD_ID, widget.keywordId);
+        intent.putExtra(REMOTE_UPDATE_ACTION_VALUE, lastValue);
+        context.sendBroadcast(intent);
+        return true;
     }
 
     public static void startService()
