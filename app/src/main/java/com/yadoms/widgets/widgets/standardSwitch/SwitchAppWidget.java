@@ -93,6 +93,10 @@ public class SwitchAppWidget
     public void onReceive(final Context context,
                           Intent intent) {
         try {
+            if ("android.appwidget.action.APPWIDGET_UPDATE".equals(intent.getAction())){
+                Log.d("TEST TODO", "A virer");
+                return;
+            }
             if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
                 currentState.put(widgetId, !(currentState.get(widgetId)));
@@ -107,7 +111,9 @@ public class SwitchAppWidget
                                 new CommandResponseHandler() {
                                     @Override
                                     public void onSuccess() {
-                                        onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+                                        //TODO virer ? onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
+
+                                        updateAppWidget(context, AppWidgetManager.getInstance(context), widgetId);
                                     }
                                 });
                     }
@@ -120,11 +126,11 @@ public class SwitchAppWidget
 
                 updateAppWidget(context, AppWidgetManager.getInstance(context), widgetId);
             }
-
-            super.onReceive(context, intent);
         } catch (InvalidConfigurationException e) {
             Log.e(getClass().getSimpleName(), e.getMessage());
         }
+
+        super.onReceive(context, intent);
     }
 
     @Override
