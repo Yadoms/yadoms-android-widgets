@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class ReadWidgetsStateWorker extends Worker
 {
     private static final String UNIQUE_WORK_NAME = ReadWidgetsStateWorker.class.getSimpleName() + "WorkName";
-    private static final int SERVER_POLL_PERIOD_SECONDS = BuildConfig.DEBUG ? 5 : 30;
+    private static final int SERVER_POLL_PERIOD_SECONDS = BuildConfig.DEBUG ? 500 : 30;
     private static final int SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS = BuildConfig.DEBUG ? 10 : 60;
 
     public static String WIDGET_REMOTE_UPDATE_ACTION = "WidgetRemoteUpdateAction";
@@ -160,10 +160,10 @@ public class ReadWidgetsStateWorker extends Worker
         return true;
     }
 
-    public static void startService()
+    public static void startService(boolean forceNow)
     {
         Log.d(ReadWidgetsStateWorker.class.getSimpleName(), "Start service");
-        if (isRunning())
+        if (isRunning() && !forceNow)
             return;
 
         restart(0);

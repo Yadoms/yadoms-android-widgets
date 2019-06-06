@@ -1,20 +1,27 @@
 package com.yadoms.widgets.widgets.standardSwitch;
 
 import android.app.PendingIntent;
+import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.IBinder;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.yadoms.widgets.R;
 import com.yadoms.widgets.application.InvalidConfigurationException;
+import com.yadoms.widgets.application.ReadWidgetsStateWorker;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
 import com.yadoms.widgets.shared.ResourceHelper;
 import com.yadoms.widgets.shared.Widget;
@@ -24,16 +31,13 @@ import com.yadoms.widgets.shared.restClient.CommandResponseHandler;
 import java.security.InvalidParameterException;
 import java.sql.SQLException;
 
-import static com.yadoms.widgets.application.ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_VALUE;
-import static com.yadoms.widgets.application.ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_WIDGET_ID;
-import static com.yadoms.widgets.application.ReadWidgetsStateWorker.WIDGET_REMOTE_UPDATE_ACTION;
-
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
  */
 public class SwitchAppWidget
         extends AppWidgetProvider {
+    private static final String START_SERVICE_EXTRA_WIDGET_IDS = "StartServiceExtraWidgetIds";
     public static String CLICK_ON_WIDGET_ACTION = "ClickOnWidgetAction";
     public static String WIDGET_ACTION_WIDGET_ID = "WidgetId";
 
@@ -41,14 +45,20 @@ public class SwitchAppWidget
 
     private static DatabaseHelper DatabaseHelper;
 
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int widgetId) {
+        //TODO code redondant avec onUpdate
+        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
+        intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, new int[]{widgetId});
+        context.startService(intent);
+    }
+
     @Override
     public void onUpdate(Context context,
                          AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
-        }
+        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
+        intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, appWidgetIds);
+        context.startService(intent);
     }
 
     @Override
@@ -80,11 +90,15 @@ public class SwitchAppWidget
     public void onReceive(final Context context,
                           Intent intent) {
         try {
-            if ("android.appwidget.action.APPWIDGET_UPDATE".equals(intent.getAction())){
+            if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
                 Log.d("TEST TODO", "A virer");
-                return;
-            }
-            if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
+
+                /* TODO non testé
+                int[] widgetsId = intent.getIntArrayExtra(START_SERVICE_EXTRA_WIDGET_IDS);
+                if (widgetsId != null && widgetsId.length > 0)
+                    onUpdate(context, AppWidgetManager.getInstance(context), widgetsId);*/
+
+            } else if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
                 currentState.put(widgetId, !(currentState.get(widgetId)));
 
@@ -98,20 +112,18 @@ public class SwitchAppWidget
                                 new CommandResponseHandler() {
                                     @Override
                                     public void onSuccess() {
-                                        //TODO virer ? onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
-
-                                        updateAppWidget(context, AppWidgetManager.getInstance(context), widgetId);
+                                        onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
                                     }
                                 });
                     }
                 });
 
-            } else if (WIDGET_REMOTE_UPDATE_ACTION.equals(intent.getAction())) {
-                final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
-                final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
+            } else if (ReadWidgetsStateWorker.WIDGET_REMOTE_UPDATE_ACTION.equals(intent.getAction())) { //TODO doublon avec ACTION_APPWIDGET_UPDATE ?
+                final int widgetId = intent.getIntExtra(ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
+                final String value = intent.getStringExtra(ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_VALUE);
                 currentState.put(widgetId, !value.equals("0"));
 
-                updateAppWidget(context, AppWidgetManager.getInstance(context), widgetId);
+                onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
             }
         } catch (InvalidConfigurationException e) {
             Log.e(getClass().getSimpleName(), e.getMessage());
@@ -122,6 +134,7 @@ public class SwitchAppWidget
 
 
 
+/*TODO virer ?
     static void updateAppWidget(Context context,
                                      AppWidgetManager appWidgetManager,
                                      int appWidgetId) {
@@ -150,7 +163,7 @@ public class SwitchAppWidget
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
+    }*/
 
     private static int translateResourceImage(int id) {
         // Translate resource image to use vector image for SDK >= 26 and mipmap for older SDK
@@ -181,6 +194,84 @@ public class SwitchAppWidget
             }
         }
         return DatabaseHelper;
+    }
+
+    public static class SwitchAppWidgetUpdateService extends Service {
+        int[] widgetsId;
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            super.onStartCommand(intent, flags, startId);
+
+            widgetsId = intent.getIntArrayExtra(START_SERVICE_EXTRA_WIDGET_IDS);
+
+            // Update the widget
+            RemoteViews remoteViews = buildRemoteView(this);
+
+            // Push update to homescreen
+            pushUpdate(remoteViews);
+
+            // No more updates so stop the service and free resources
+            stopSelf();
+            return flags;
+        }
+
+        @Nullable
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+
+        public RemoteViews buildRemoteView(Context context) {
+            int appWidgetId = widgetsId[0]; // TODO gérer tout le tableau
+
+            Widget widget;
+            try {
+                widget = getDatabaseHelper(context).getWidget(appWidgetId);
+            } catch (InvalidConfigurationException e) {
+                Log.w(SwitchAppWidget.class.getSimpleName(), "Fail to update widget : widget not found in database");
+                return null;
+            }
+
+            // Construct the RemoteViews object
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
+            views.setTextViewText(R.id.appwidget_label,
+                    (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
+//TODO corriger les glitchs 'Unknown' sur le label
+            views.setImageViewResource(R.id.appwidget_image,
+                    currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
+            views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, currentState.get(appWidgetId) ? R.color.yadomsOfficial : R.color.off));
+
+            Intent intent = new Intent(context, SwitchAppWidget.class);
+            intent.setAction(CLICK_ON_WIDGET_ACTION);
+            intent.putExtra(WIDGET_ACTION_WIDGET_ID, appWidgetId);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+            views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
+
+
+            return views;
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) //TODO utile (normalement pour gérer la rotation) ?
+        {/*TODO remettre ?
+            int oldOrientation = this.getResources().getConfiguration().orientation;
+
+            if(newConfig.orientation != oldOrientation)
+            {
+                // Update the widget
+                RemoteViews remoteViews = buildRemoteView(this);
+
+                // Push update to homescreen
+                pushUpdate(remoteViews);
+            }*/
+        }
+
+        private void pushUpdate(RemoteViews remoteViews) {
+            ComponentName myWidget = new ComponentName(this, SwitchAppWidget.class);
+            AppWidgetManager manager = AppWidgetManager.getInstance(this);
+            manager.updateAppWidget(myWidget, remoteViews);
+        }
     }
 }
 

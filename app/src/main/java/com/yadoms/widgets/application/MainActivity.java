@@ -34,7 +34,7 @@ public class MainActivity
 
         ScreenStateReceiver.start(getApplicationContext());
 
-        ReadWidgetsStateWorker.startService();
+        ReadWidgetsStateWorker.startService(false);
     }
 
     private void checkConnected() {

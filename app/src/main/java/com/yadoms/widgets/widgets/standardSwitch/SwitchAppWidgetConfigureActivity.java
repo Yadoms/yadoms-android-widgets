@@ -60,8 +60,8 @@ public class SwitchAppWidgetConfigureActivity
             }
 
             // It is the responsibility of the configuration activity to update the app widget
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            SwitchAppWidget.updateAppWidget(context, appWidgetManager, appWidgetId);
+//            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+//            SwitchAppWidget.updateAppWidget(context, appWidgetManager, appWidgetId);//TODO remplacer par un événement d'update
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
@@ -70,7 +70,7 @@ public class SwitchAppWidgetConfigureActivity
 
             // Start monitoring widget state (if not already started)
             if (ScreenStateReceiver.userIsPresent() && NetworkStateReceiver.networkIsAvailable()) {
-                ReadWidgetsStateWorker.startService();
+                ReadWidgetsStateWorker.startService(true);
             }
 
             finish();

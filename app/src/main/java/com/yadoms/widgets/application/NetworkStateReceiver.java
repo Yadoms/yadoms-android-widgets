@@ -37,6 +37,6 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
         Log.d(getClass().getSimpleName(), "Network Available");
         networkAvailable = true;
-        ReadWidgetsStateWorker.startService();
+        ReadWidgetsStateWorker.startService(false);
     }
 }

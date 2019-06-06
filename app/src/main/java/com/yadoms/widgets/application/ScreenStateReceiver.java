@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class ScreenStateReceiver extends BroadcastReceiver {
 
-    private static boolean userIsPresent;
+    private static boolean userIsPresent = true;//TODO initialiser en fonction de l'état réel du réseau
 
     public static void start(Context applicationContext) {
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
@@ -39,7 +39,7 @@ public class ScreenStateReceiver extends BroadcastReceiver {
         {
             Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is ON and user is present");
             userIsPresent = true;
-            ReadWidgetsStateWorker.startService();
+            ReadWidgetsStateWorker.startService(false);
         }
     }
 }
