@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.yadoms.widgets.R;
 import com.yadoms.widgets.application.InvalidConfigurationException;
 import com.yadoms.widgets.application.NetworkStateReceiver;
-import com.yadoms.widgets.application.ReadWidgetsStateWorker;
 import com.yadoms.widgets.application.ScreenStateReceiver;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
 import com.yadoms.widgets.shared.Device;
@@ -70,7 +69,7 @@ public class SwitchAppWidgetConfigureActivity
 
             // Start monitoring widget state (if not already started)
             if (ScreenStateReceiver.userIsPresent() && NetworkStateReceiver.networkIsAvailable()) {
-                ReadWidgetsStateWorker.startService(true);
+                //TODO remettre ReadWidgetsStateWorker.startService(true);
             }
 
             finish();

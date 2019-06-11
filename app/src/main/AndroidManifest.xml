@@ -37,7 +37,9 @@
                 android:value="com.yadoms.widgets.application.MainActivity" />
         </activity>
 
-        <receiver android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget">
+        <receiver
+            android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget"
+            android:label="Switch">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

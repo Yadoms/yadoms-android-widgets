@@ -31,12 +31,12 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         if (!wifi.isAvailable() && !mobile.isAvailable()) {
             Log.d(getClass().getSimpleName(), "Network Lost");
             networkAvailable = false;
-            ReadWidgetsStateWorker.stopService();
+            //TODO remettre ReadWidgetsStateWorker.stopService();
             return;
         }
 
         Log.d(getClass().getSimpleName(), "Network Available");
         networkAvailable = true;
-        ReadWidgetsStateWorker.startService(false);
+        //TODO remettre ReadWidgetsStateWorker.startService(false);
     }
 }

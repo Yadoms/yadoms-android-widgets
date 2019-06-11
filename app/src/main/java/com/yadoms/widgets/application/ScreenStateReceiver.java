@@ -33,13 +33,13 @@ public class ScreenStateReceiver extends BroadcastReceiver {
         {
             Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is OFF");
             userIsPresent = false;
-            ReadWidgetsStateWorker.stopService();
+            //TODO remettre ReadWidgetsStateWorker.stopService();
         }
         if (Intent.ACTION_USER_PRESENT.equals(intent.getAction()))
         {
             Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is ON and user is present");
             userIsPresent = true;
-            ReadWidgetsStateWorker.startService(false);
+            //TODO remettre ReadWidgetsStateWorker.startService(false);
         }
     }
 }

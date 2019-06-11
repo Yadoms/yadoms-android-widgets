@@ -1,35 +1,10 @@
 package com.yadoms.widgets.application;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.work.Constraints;
-import androidx.work.ExistingWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
-
-import com.yadoms.widgets.BuildConfig;
-import com.yadoms.widgets.application.preferences.DatabaseHelper;
-import com.yadoms.widgets.shared.Widget;
-import com.yadoms.widgets.shared.restClient.Client;
-import com.yadoms.widgets.shared.restClient.GetResponseHandler;
-
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
+/*
 public class ReadWidgetsStateWorker extends Worker
 {
     private static final String UNIQUE_WORK_NAME = ReadWidgetsStateWorker.class.getSimpleName() + "WorkName";
-    private static final int SERVER_POLL_PERIOD_SECONDS = BuildConfig.DEBUG ? 500 : 30;
+    private static final int SERVER_POLL_PERIOD_SECONDS = BuildConfig.DEBUG ? 5 : 30;
     private static final int SERVER_POLL_AFTER_CONNECTION_FAILED_RETRY_SECONDS = BuildConfig.DEBUG ? 10 : 60;
 
     public static String WIDGET_REMOTE_UPDATE_ACTION = "WidgetRemoteUpdateAction";
@@ -201,3 +176,4 @@ public class ReadWidgetsStateWorker extends Worker
     }
 }
 
+*/
