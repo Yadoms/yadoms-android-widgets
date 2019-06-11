@@ -60,8 +60,8 @@ public class SwitchAppWidgetConfigureActivity
             }
 
             // It is the responsibility of the configuration activity to update the app widget
-//            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-//            SwitchAppWidget.updateAppWidget(context, appWidgetManager, appWidgetId);//TODO remplacer par un événement d'update
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            SwitchAppWidget.updateAppWidget(context, appWidgetManager, appWidgetId);
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();

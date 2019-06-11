@@ -45,11 +45,41 @@ public class SwitchAppWidget
 
     private static DatabaseHelper DatabaseHelper;
 
-    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int widgetId) {
-        //TODO code redondant avec onUpdate
-        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
-        intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, new int[]{widgetId});
-        context.startService(intent);
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        RemoteViews views = new RemoteViews(context.getPackageName(),
+                R.layout.switch_app_widget);
+        appWidgetManager.updateAppWidget(appWidgetId, views);
+    }
+
+    private static int translateResourceImage(int id) {
+        // Translate resource image to use vector image for SDK >= 26 and mipmap for older SDK
+        // Needed by widgets as ImageView before SDK 26 doesn't support vector images
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            return id;
+        }
+
+        final SparseIntArray imagesResourceIdMap = new SparseIntArray();
+        imagesResourceIdMap.put(R.drawable.ic_baseline_toggle_off_24px, R.mipmap.ic_baseline_toggle_off);
+        imagesResourceIdMap.put(R.drawable.ic_baseline_toggle_on_24px, R.mipmap.ic_baseline_toggle_on);
+
+        int returnedId = imagesResourceIdMap.get(id, -1);
+        if (returnedId == -1)
+            throw new InvalidParameterException("Image resource ID not found");
+        return returnedId;
+    }
+
+    private static DatabaseHelper getDatabaseHelper(Context context) {
+        if (DatabaseHelper == null) {
+            try {
+                DatabaseHelper = new DatabaseHelper(context);
+            } catch (SQLException e) {
+                Toast.makeText(context,
+                        context.getString(R.string.unable_to_access_configuration),
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+        return DatabaseHelper;
     }
 
     @Override
@@ -80,6 +110,39 @@ public class SwitchAppWidget
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
     }
+
+
+
+/*TODO virer ?
+    static void updateAppWidget(Context context,
+                                     AppWidgetManager appWidgetManager,
+                                     int appWidgetId) {
+        Widget widget;
+        try {
+            widget = getDatabaseHelper(context).getWidget(appWidgetId);
+        } catch (InvalidConfigurationException e) {
+            Log.w(SwitchAppWidget.class.getSimpleName(), "Fail to update widget : widget not found in database");
+            return;
+        }
+
+        // Construct the RemoteViews object
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
+        views.setTextViewText(R.id.appwidget_label,
+                (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
+//TODO corriger les glitchs 'Unknown' sur le label
+        views.setImageViewResource(R.id.appwidget_image,
+                currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
+        views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, currentState.get(appWidgetId) ? R.color.yadomsOfficial : R.color.off));
+
+        Intent intent = new Intent(context, SwitchAppWidget.class);
+        intent.setAction(CLICK_ON_WIDGET_ACTION);
+        intent.putExtra(WIDGET_ACTION_WIDGET_ID, appWidgetId);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
+
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views);
+    }*/
 
     @Override
     public void onDisabled(Context context) {
@@ -130,70 +193,6 @@ public class SwitchAppWidget
         }
 
         super.onReceive(context, intent);
-    }
-
-
-
-/*TODO virer ?
-    static void updateAppWidget(Context context,
-                                     AppWidgetManager appWidgetManager,
-                                     int appWidgetId) {
-        Widget widget;
-        try {
-            widget = getDatabaseHelper(context).getWidget(appWidgetId);
-        } catch (InvalidConfigurationException e) {
-            Log.w(SwitchAppWidget.class.getSimpleName(), "Fail to update widget : widget not found in database");
-            return;
-        }
-
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
-        views.setTextViewText(R.id.appwidget_label,
-                (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
-//TODO corriger les glitchs 'Unknown' sur le label
-        views.setImageViewResource(R.id.appwidget_image,
-                currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
-        views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, currentState.get(appWidgetId) ? R.color.yadomsOfficial : R.color.off));
-
-        Intent intent = new Intent(context, SwitchAppWidget.class);
-        intent.setAction(CLICK_ON_WIDGET_ACTION);
-        intent.putExtra(WIDGET_ACTION_WIDGET_ID, appWidgetId);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }*/
-
-    private static int translateResourceImage(int id) {
-        // Translate resource image to use vector image for SDK >= 26 and mipmap for older SDK
-        // Needed by widgets as ImageView before SDK 26 doesn't support vector images
-
-        if (Build.VERSION.SDK_INT >= 26) {
-            return id;
-        }
-
-        final SparseIntArray imagesResourceIdMap = new SparseIntArray();
-        imagesResourceIdMap.put(R.drawable.ic_baseline_toggle_off_24px, R.mipmap.ic_baseline_toggle_off);
-        imagesResourceIdMap.put(R.drawable.ic_baseline_toggle_on_24px, R.mipmap.ic_baseline_toggle_on);
-
-        int returnedId = imagesResourceIdMap.get(id, -1);
-        if (returnedId == -1)
-            throw new InvalidParameterException("Image resource ID not found");
-        return returnedId;
-    }
-
-    private static DatabaseHelper getDatabaseHelper(Context context) {
-        if (DatabaseHelper == null) {
-            try {
-                DatabaseHelper = new DatabaseHelper(context);
-            } catch (SQLException e) {
-                Toast.makeText(context,
-                        context.getString(R.string.unable_to_access_configuration),
-                        Toast.LENGTH_LONG).show();
-            }
-        }
-        return DatabaseHelper;
     }
 
     public static class SwitchAppWidgetUpdateService extends Service {
