@@ -17,8 +17,6 @@ import android.widget.Toast;
 
 import com.yadoms.widgets.R;
 import com.yadoms.widgets.application.InvalidConfigurationException;
-import com.yadoms.widgets.application.NetworkStateReceiver;
-import com.yadoms.widgets.application.ScreenStateReceiver;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
 import com.yadoms.widgets.shared.Device;
 import com.yadoms.widgets.shared.EKeywordAccessMode;
@@ -60,17 +58,12 @@ public class SwitchAppWidgetConfigureActivity
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            SwitchAppWidget.updateAppWidget(context, appWidgetManager, appWidgetId);
+            SwitchAppWidget.updateAppWidget(context, appWidgetManager, new int[]{appWidgetId});
 
             // Make sure we pass back the original appWidgetId
             Intent resultValue = new Intent();
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
-
-            // Start monitoring widget state (if not already started)
-            if (ScreenStateReceiver.userIsPresent() && NetworkStateReceiver.networkIsAvailable()) {
-                //TODO remettre ReadWidgetsStateWorker.startService(true);
-            }
 
             finish();
         }

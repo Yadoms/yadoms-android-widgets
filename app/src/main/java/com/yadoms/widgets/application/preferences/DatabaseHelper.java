@@ -40,6 +40,16 @@ public class DatabaseHelper {
         }
     }
 
+    public int[] getAllWidgetIds() {
+        List<Widget> widgets = getAllWidgets();
+        int[] appWidgetIds = new int[widgets.size()];
+        int i = 0;
+        for (Widget widget : widgets) {
+            appWidgetIds[i++] = widget.id;
+        }
+        return appWidgetIds;
+    }
+
     public Widget getWidget(int widgetId) throws InvalidConfigurationException {
         try {
             return widgetDao.queryForId(widgetId).toWidget();

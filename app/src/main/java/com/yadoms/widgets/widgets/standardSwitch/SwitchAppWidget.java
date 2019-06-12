@@ -48,10 +48,10 @@ public class SwitchAppWidget
 
     private static DatabaseHelper DatabaseHelper;
 
-    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
-        Log.d(SwitchAppWidget.class.getSimpleName(), "updateAppWidget, appWidgetId=" + appWidgetId);
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        Log.d(SwitchAppWidget.class.getSimpleName(), "updateAppWidget, appWidgetId=" + Arrays.toString(appWidgetIds));
         Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
-        intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, new int[]{appWidgetId});
+        intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, appWidgetIds);
         context.startService(intent);
     }
 
@@ -191,13 +191,6 @@ public class SwitchAppWidget
                 RemoteViews remoteViews = buildRemoteView(context, widgetId, newValue);
                 pushUpdate(context, widgetId, remoteViews);
             }
-            /* else if (ReadWidgetsStateWorker.WIDGET_REMOTE_UPDATE_ACTION.equals(intent.getAction())) { //TODO doublon avec ACTION_APPWIDGET_UPDATE ?
-                final int widgetId = intent.getIntExtra(ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
-                final String value = intent.getStringExtra(ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_VALUE);
-                currentState.put(widgetId, !value.equals("0"));
-
-                onUpdate(context, AppWidgetManager.getInstance(context), new int[]{widgetId});
-            }*/
         } catch (InvalidConfigurationException e) {
             Log.e(getClass().getSimpleName(), e.getMessage());
         }
@@ -205,7 +198,7 @@ public class SwitchAppWidget
         super.onReceive(context, intent);
     }
 
-    public static class SwitchAppWidgetUpdateService extends IntentService {
+    public static class SwitchAppWidgetUpdateService extends IntentService { //TODO IntentService non supporté en API26
         public SwitchAppWidgetUpdateService() {
             super(SwitchAppWidgetUpdateService.class.getSimpleName());
         }
