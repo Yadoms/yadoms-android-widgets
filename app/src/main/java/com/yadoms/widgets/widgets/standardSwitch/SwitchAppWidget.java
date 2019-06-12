@@ -50,12 +50,9 @@ public class SwitchAppWidget
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         Log.d(SwitchAppWidget.class.getSimpleName(), "updateAppWidget, appWidgetId=" + appWidgetId);
-        //TODO virer ? RemoteViews views = new RemoteViews(context.getPackageName(),                R.layout.switch_app_widget);
-        // Update the widgets via the service
-        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);//TODO context ou context.getApplicationContext() ?
+        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
         intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, new int[]{appWidgetId});
         context.startService(intent);
-//TODO virer ?        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     private static int translateResourceImage(int id) {
@@ -126,7 +123,7 @@ public class SwitchAppWidget
                          int[] appWidgetIds) {
         Log.d(getClass().getSimpleName(), "onUpdate, context=" + context + ", appWidgetIds=" + Arrays.toString(appWidgetIds));
         // Update the widgets via the service
-        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);//TODO context ou context.getApplicationContext() ?
+        Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
         intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, appWidgetIds);
         context.startService(intent);
     }
@@ -151,39 +148,6 @@ public class SwitchAppWidget
         // Enter relevant functionality for when the first widget is created
     }
 
-
-
-/*TODO virer ?
-    static void updateAppWidget(Context context,
-                                     AppWidgetManager appWidgetManager,
-                                     int appWidgetId) {
-        Widget widget;
-        try {
-            widget = getDatabaseHelper(context).getWidget(appWidgetId);
-        } catch (InvalidConfigurationException e) {
-            Log.w(getClass().getSimpleName(), "Fail to update widget : widget not found in database");
-            return;
-        }
-
-        // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.switch_app_widget);
-        views.setTextViewText(R.id.appwidget_label,
-                (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
-//TODO corriger les glitchs 'Unknown' sur le label
-        views.setImageViewResource(R.id.appwidget_image,
-                currentState.get(appWidgetId) ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
-        views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, currentState.get(appWidgetId) ? R.color.yadomsOfficial : R.color.off));
-
-        Intent intent = new Intent(context, SwitchAppWidget.class);
-        intent.setAction(CLICK_ON_WIDGET_ACTION);
-        intent.putExtra(WIDGET_ACTION_WIDGET_ID, appWidgetId);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        views.setOnClickPendingIntent(R.id.widget_layout, pendingIntent);
-
-        // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }*/
-
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
@@ -193,11 +157,7 @@ public class SwitchAppWidget
     public void onReceive(final Context context,
                           Intent intent) {
         try {
-            /*if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
-                Log.d("TEST TODO", "A virer");
-
-
-            } else */if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
+            if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
                 boolean newValue = !currentState.get(widgetId);
 
@@ -314,7 +274,6 @@ public class SwitchAppWidget
         public IBinder onBind(Intent intent) {
             return null;
         }
-
 
 
         @Override
