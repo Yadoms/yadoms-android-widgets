@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -30,6 +29,7 @@ import com.yadoms.widgets.shared.restClient.GetResponseHandler;
 
 import java.security.InvalidParameterException;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * Implementation of App Widget functionality.
@@ -49,6 +49,7 @@ public class SwitchAppWidget
     private static DatabaseHelper DatabaseHelper;
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        Log.d(SwitchAppWidget.class.getSimpleName(), "updateAppWidget, appWidgetId=" + appWidgetId);
         //TODO virer ? RemoteViews views = new RemoteViews(context.getPackageName(),                R.layout.switch_app_widget);
         // Update the widgets via the service
         Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);//TODO context ou context.getApplicationContext() ?
@@ -88,7 +89,8 @@ public class SwitchAppWidget
         return DatabaseHelper;
     }
 
-    public RemoteViews buildRemoteView(Context context, int widgetId, String newValue) {
+    public RemoteViews buildRemoteView(Context context, int widgetId, boolean newValue) {
+        Log.d(getClass().getSimpleName(), "buildRemoteView, widgetId=" + widgetId + ", newValue=" + newValue);
         Widget widget;
         try {
             widget = getDatabaseHelper(context).getWidget(widgetId);
@@ -101,8 +103,8 @@ public class SwitchAppWidget
         views.setTextViewText(R.id.appwidget_label,
                 (widget.label != null && !widget.label.isEmpty()) ? widget.label : Integer.toString(widget.keywordId));
         views.setImageViewResource(R.id.appwidget_image,
-                !newValue.equals("0") ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
-        views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, !newValue.equals("0") ? R.color.yadomsOfficial : R.color.off));
+                newValue ? translateResourceImage(R.drawable.ic_baseline_toggle_on_24px) : translateResourceImage(R.drawable.ic_baseline_toggle_off_24px));
+        views.setInt(R.id.appwidget_image, "setColorFilter", ResourceHelper.getColorFromResource(context, newValue ? R.color.yadomsOfficial : R.color.off));
 
         Intent intent = new Intent(context, SwitchAppWidget.class);
         intent.setAction(CLICK_ON_WIDGET_ACTION);
@@ -113,16 +115,16 @@ public class SwitchAppWidget
         return views;
     }
 
-    private void pushUpdate(Context context, RemoteViews remoteViews) {
-        ComponentName myWidget = new ComponentName(context, SwitchAppWidget.class);
+    private void pushUpdate(Context context, int widgetId, RemoteViews remoteViews) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
-        manager.updateAppWidget(myWidget, remoteViews);
+        manager.updateAppWidget(widgetId, remoteViews);
     }
 
     @Override
     public void onUpdate(Context context,
                          AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
+        Log.d(getClass().getSimpleName(), "onUpdate, context=" + context + ", appWidgetIds=" + Arrays.toString(appWidgetIds));
         // Update the widgets via the service
         Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);//TODO context ou context.getApplicationContext() ?
         intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, appWidgetIds);
@@ -191,17 +193,17 @@ public class SwitchAppWidget
     public void onReceive(final Context context,
                           Intent intent) {
         try {
-            if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
+            /*if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
                 Log.d("TEST TODO", "A virer");
 
-                /* TODO non testé
-                int[] widgetsId = intent.getIntArrayExtra(START_SERVICE_EXTRA_WIDGET_IDS);
-                if (widgetsId != null && widgetsId.length > 0)
-                    onUpdate(context, AppWidgetManager.getInstance(context), widgetsId);*/
 
-            } else if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
+            } else */if (CLICK_ON_WIDGET_ACTION.equals(intent.getAction())) {
                 final int widgetId = intent.getIntExtra(WIDGET_ACTION_WIDGET_ID, 0);
-                currentState.put(widgetId, !(currentState.get(widgetId)));
+                boolean newValue = !currentState.get(widgetId);
+
+                Log.d(getClass().getSimpleName(), "onReceive, Click, widgetId=" + widgetId + ", newValue=" + newValue);
+
+                currentState.put(widgetId, newValue);
 
                 final Client yadomsRestClient = new Client(context.getApplicationContext());
                 final int keywordId = getDatabaseHelper(context).getWidget(widgetId).keywordId;
@@ -223,8 +225,11 @@ public class SwitchAppWidget
                 final int widgetId = intent.getIntExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
                 final String value = intent.getStringExtra(REMOTE_UPDATE_ACTION_VALUE);
 
-                RemoteViews remoteViews = buildRemoteView(context, widgetId, value);
-                pushUpdate(context, remoteViews);
+                boolean newValue = !value.equals("0");
+                currentState.put(widgetId, newValue);
+
+                RemoteViews remoteViews = buildRemoteView(context, widgetId, newValue);
+                pushUpdate(context, widgetId, remoteViews);
             }
             /* else if (ReadWidgetsStateWorker.WIDGET_REMOTE_UPDATE_ACTION.equals(intent.getAction())) { //TODO doublon avec ACTION_APPWIDGET_UPDATE ?
                 final int widgetId = intent.getIntExtra(ReadWidgetsStateWorker.REMOTE_UPDATE_ACTION_WIDGET_ID, 0);
@@ -255,7 +260,7 @@ public class SwitchAppWidget
         }
 
         private void requestWidgetsState(final Context context, int[] widgetsId) {
-            Log.d(getClass().getSimpleName(), "Read widgets state...");
+            Log.d(getClass().getSimpleName(), "requestWidgetsState, widgetsId=" + Arrays.toString(widgetsId));
             try {
                 final DatabaseHelper databaseHelper = new DatabaseHelper(context);
                 Client yadomsRestClient = new Client(context);
@@ -289,7 +294,8 @@ public class SwitchAppWidget
             }
         }
 
-        private void sendToWidget(Context context, Widget widget, String lastValue) {
+        private void sendToWidget(Context context, Widget widget, String value) {
+            Log.d(getClass().getSimpleName(), "sendToWidget, widgetsId=" + widget.id + ", value=" + value);
             Intent intent;
             try {
                 intent = new Intent(context, Class.forName(widget.className));
@@ -299,7 +305,7 @@ public class SwitchAppWidget
             }
             intent.setAction(WIDGET_REMOTE_UPDATE_ACTION);
             intent.putExtra(REMOTE_UPDATE_ACTION_WIDGET_ID, widget.id);
-            intent.putExtra(REMOTE_UPDATE_ACTION_VALUE, lastValue);
+            intent.putExtra(REMOTE_UPDATE_ACTION_VALUE, value);
             context.sendBroadcast(intent);
         }
 
