@@ -68,6 +68,7 @@ public class SwitchAppWidgetConfigureActivity
             finish();
         }
     };
+    private String selectedDeviceName;
 
     public SwitchAppWidgetConfigureActivity() {
         super();
@@ -132,11 +133,13 @@ public class SwitchAppWidgetConfigureActivity
                                                                            final int i,
                                                                            long l) {
                                                     onDeviceSelected(client, devices[i]);
+                                                    selectedDeviceName = devices[i].getFriendlyName();
                                                 }
 
                                                 @Override
                                                 public void onNothingSelected(AdapterView<?> adapterView) {
                                                     viewHolder.submitButton.setEnabled(false);
+                                                    selectedDeviceName = "";
                                                 }
                                             });
                                         }
@@ -199,6 +202,11 @@ public class SwitchAppWidgetConfigureActivity
     private void onKeywordSelected(Keyword keyword) {
         Log.d("KeywordSelected", "keyword Id=" + keyword.getId() + " " + keyword.getFriendlyName());
         selectedKeyword = keyword;
+
+        // Default value
+        viewHolder.labelEditText.setText(selectedDeviceName);
+        viewHolder.labelEditText.selectAll();
+
         viewHolder.submitButton.setEnabled(true);
     }
 
