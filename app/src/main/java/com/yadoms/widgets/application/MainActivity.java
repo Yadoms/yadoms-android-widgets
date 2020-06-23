@@ -42,11 +42,6 @@ public class MainActivity
             @Override
             public void run() {
                 try {
-                    if (!NetworkStateReceiver.networkIsAvailable()) {
-                        onConnectionEvent(false);
-                        return;
-                    }
-
                     Client client = new Client(getApplicationContext());
                     client.withTimeout(2000);
                     client.getLastEvent(new GetResponseHandler() {
@@ -63,6 +58,7 @@ public class MainActivity
                 } catch (InvalidConfigurationException ignored) {
                     onConnectionEvent(false);
                 }
+                checkConnected();
             }
         });
     }

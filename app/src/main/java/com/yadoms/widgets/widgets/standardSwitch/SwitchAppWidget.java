@@ -19,6 +19,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.yadoms.widgets.R;
+import com.yadoms.widgets.application.ConnectionStateMonitor;
 import com.yadoms.widgets.application.InvalidConfigurationException;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
 import com.yadoms.widgets.shared.ResourceHelper;
@@ -47,6 +48,7 @@ public class SwitchAppWidget
     private static SparseBooleanArray currentState = new SparseBooleanArray();
 
     private static DatabaseHelper DatabaseHelper;
+    private static ConnectionStateMonitor connectionStateMonitor = new ConnectionStateMonitor();
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Log.d(SwitchAppWidget.class.getSimpleName(), "updateAppWidget, appWidgetId=" + Arrays.toString(appWidgetIds));
@@ -122,6 +124,7 @@ public class SwitchAppWidget
                          AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
         Log.d(getClass().getSimpleName(), "onUpdate, context=" + context + ", appWidgetIds=" + Arrays.toString(appWidgetIds));
+        connectionStateMonitor.enable(context);
         // Update the widgets via the service
         Intent intent = new Intent(context, SwitchAppWidgetUpdateService.class);
         intent.putExtra(START_SERVICE_EXTRA_WIDGET_IDS, appWidgetIds);
@@ -141,6 +144,7 @@ public class SwitchAppWidget
                 e.printStackTrace();
             }
         }
+        connectionStateMonitor.disable(context);
     }
 
     @Override

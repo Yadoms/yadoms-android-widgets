@@ -39,7 +39,9 @@ public class Client {
         }
     }
 
-    public void withTimeout(int delayMillis) {
+    public void withTimeout(int delayMillis)
+    {
+        client.setMaxRetriesAndTimeout(0, delayMillis);
         client.setTimeout(delayMillis);
     }
 
