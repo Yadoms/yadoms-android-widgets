@@ -58,7 +58,6 @@ public class MainActivity
                 } catch (InvalidConfigurationException ignored) {
                     onConnectionEvent(false);
                 }
-                checkConnected();
             }
         });
     }
@@ -75,7 +74,7 @@ public class MainActivity
                 textView.setTextColor(connected ? ResourceHelper.getColorFromResource(getApplicationContext(), R.color.yadomsOfficial) : Color.RED);
                 textView.setText(connected ? R.string.connection_ok : R.string.connection_failed);
 
-                checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, 2000);
+                checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, connected ? 2000 : 0);
             }
         });
     }
