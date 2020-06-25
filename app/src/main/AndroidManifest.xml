@@ -35,7 +35,8 @@
 
         <receiver
             android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget"
-            android:label="Switch">
+            android:label="Switch"
+            android:icon="@drawable/ic_baseline_toggle_on_24px">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -59,6 +60,7 @@
         </activity>
 
         <service android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget$SwitchAppWidgetUpdateService" />
+        <service android:name=".widgets.standardSwitch.SwitchAppWidget$ClockUpdateService" />
     </application>
 
 </manifest>
