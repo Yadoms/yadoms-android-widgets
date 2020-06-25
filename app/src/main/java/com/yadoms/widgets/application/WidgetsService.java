@@ -9,8 +9,8 @@ import com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget;
 
 import java.sql.SQLException;
 
-class WidgetsService {
-    static void refreshAll(Context context) {
+public class WidgetsService {
+    public static void refreshAll(Context context) {
         int[] appWidgetIds;
         try {
             final DatabaseHelper databaseHelper = new DatabaseHelper(context);

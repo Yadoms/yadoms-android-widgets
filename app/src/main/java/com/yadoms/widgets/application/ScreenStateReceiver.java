@@ -19,7 +19,6 @@ public class ScreenStateReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
             Log.d(ScreenStateReceiver.class.getSimpleName(), "Screen is ON and user is present");
-            //TODO remettre ReadWidgetsStateWorker.startService(false);
             WidgetsService.refreshAll(context);
         }
     }

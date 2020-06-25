@@ -8,12 +8,12 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.yadoms.widgets.R;
 import com.yadoms.widgets.shared.ResourceHelper;
 import com.yadoms.widgets.shared.restClient.Client;
 import com.yadoms.widgets.shared.restClient.GetResponseHandler;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 //TODO ajouter le support du français
 
@@ -33,8 +33,6 @@ public class MainActivity
         setContentView(R.layout.activity_main);
 
         ScreenStateReceiver.start(getApplicationContext());
-
-        //TODO remettre ReadWidgetsStateWorker.startService(false);
     }
 
     private void checkConnected() {

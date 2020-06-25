@@ -6,6 +6,5 @@
                     android:minHeight="40dp"
                     android:previewImage="@mipmap/ic_baseline_toggle_off"
                     android:resizeMode="none"
-                    android:updatePeriodMillis="1800000"
                     android:widgetCategory="home_screen">
 </appwidget-provider>

@@ -11,7 +11,6 @@ public class BootServiceReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()))
         {
             WidgetsService.refreshAll(context);
-            //TODO remettre ReadWidgetsStateWorker.startService(false);
         }
     }
 }
