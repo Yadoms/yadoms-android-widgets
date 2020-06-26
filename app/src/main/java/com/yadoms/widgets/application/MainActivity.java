@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,75 +17,109 @@ import androidx.appcompat.app.AppCompatActivity;
 //TODO ajouter le support du français
 
 public class MainActivity
-        extends AppCompatActivity {
-    Handler checkConnectionTimerHandler = new Handler();
-    Runnable checkConnectionTimerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            checkConnected();
+        extends AppCompatActivity
+{
+    class CancellableRunnable
+            implements Runnable
+    {
+        private boolean m_stopAsked = false;
+
+        void stop()
+        {
+            m_stopAsked = true;
         }
-    };
+
+        @Override
+        public void run()
+        {
+            while (true)
+            {
+                if (m_stopAsked)
+                {
+                    m_stopAsked = false;
+                    return;
+                }
+
+                try
+                {
+                    Client client = new Client(getApplicationContext());
+                    client.withTimeout(2000);
+                    client.getLastEvent(new GetResponseHandler()
+                    {
+                        @Override
+                        public void onSuccess(Object[] objects)
+                        {
+                            onConnectionEvent(true);
+
+                            try
+                            {
+                                Thread.sleep(2000);
+                            }
+                            catch (InterruptedException ignored)
+                            {
+                            }
+                        }
+
+                        @Override
+                        public void onFailure()
+                        {
+                            onConnectionEvent(false);
+                            // No need to wait to restart connection test, timeout make us already wait enough
+                        }
+                    });
+                }
+                catch (InvalidConfigurationException ignored)
+                {
+                    onConnectionEvent(false);
+                }
+            }
+        }
+    }
+
+    private CancellableRunnable m_checkConnectionTask = new CancellableRunnable();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ScreenStateReceiver.start(getApplicationContext());
     }
 
-    private void checkConnected() {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Client client = new Client(getApplicationContext());
-                    client.withTimeout(2000);
-                    client.getLastEvent(new GetResponseHandler() {
-                        @Override
-                        public void onSuccess(Object[] objects) {
-                            onConnectionEvent(true);
-                        }
-
-                        @Override
-                        public void onFailure() {
-                            onConnectionEvent(false);
-                        }
-                    });
-                } catch (InvalidConfigurationException ignored) {
-                    onConnectionEvent(false);
-                }
-            }
-        });
-    }
-
-    public void openSettingsActivity(View view) {
+    public void openSettingsActivity(View view)
+    {
         startActivity(new Intent(this, SettingsActivity.class));
     }
 
-    private void onConnectionEvent(final boolean connected) {
-        runOnUiThread(new Runnable() {
+    private void onConnectionEvent(final boolean connected)
+    {
+        runOnUiThread(new Runnable()
+        {
             @Override
-            public void run() {
+            public void run()
+            {
                 TextView textView = findViewById(R.id.connectionStateText);
-                textView.setTextColor(connected ? ResourceHelper.getColorFromResource(getApplicationContext(), R.color.yadomsOfficial) : Color.RED);
+                textView.setTextColor(connected ? ResourceHelper.getColorFromResource(
+                        getApplicationContext(),
+                        R.color.yadomsOfficial) : Color.RED);
                 textView.setText(connected ? R.string.connection_ok : R.string.connection_failed);
-
-                checkConnectionTimerHandler.postDelayed(checkConnectionTimerRunnable, connected ? 2000 : 0);
             }
         });
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         MainPreferences.invalid();
-        checkConnected();
+        AsyncTask.execute(m_checkConnectionTask);
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
-        checkConnectionTimerHandler.removeCallbacks(checkConnectionTimerRunnable);
+        m_checkConnectionTask.stop();
     }
 }
