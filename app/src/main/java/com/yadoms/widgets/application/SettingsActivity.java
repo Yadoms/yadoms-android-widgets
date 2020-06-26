@@ -20,10 +20,10 @@ import android.view.MenuItem;
 
 import com.yadoms.widgets.R;
 
+import java.util.List;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.NavUtils;
-
-import java.util.List;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -39,6 +39,7 @@ import java.util.List;
 public class SettingsActivity
         extends AppCompatPreferenceActivity
 {
+    //TODO le bouton back physique n'a pas le même comportement que la flèche en haut à gauche (par exemple si on a lancé l'activité depuis l'activité de configuration de widget)
 
     /**
      * A preference value change listener that updates the preference's summary

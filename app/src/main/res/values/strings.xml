@@ -3,6 +3,7 @@
     <string name="appwidget_default_text">Unknown</string>
     <string name="configure">Configure switch widget</string>
     <string name="add_widget">Add widget</string>
+    <string name="configureNetwork">Configure network</string>
     <string name="yadoms_server_address">Your Yadoms server address</string>
     <string name="yadoms_server_login">Login</string>
     <string name="yadoms_server_password">Password</string>
@@ -81,5 +82,6 @@
     <string name="unable_to_access_configuration">Unable to access configuration</string>
     <string name="unable_to_save_configuration">Unable to save configuration</string>
     <string name="yadoms">Yadoms</string>
-    <string name="configureDescription">Select the device to drive (only on/off devices supported)</string>
+    <string name="configureDescription">Select the device to drive (on/off devices supported)</string>
+    <string name="failToConnectWarning">Unable to join Yadoms server, please check your network configuration</string>
 </resources>

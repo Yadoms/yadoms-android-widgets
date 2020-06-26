@@ -249,7 +249,7 @@ public class SwitchAppWidget
         connectionStateMonitor.enable(context);
 
         // Start clock service
-        Intent intent = new Intent(context, ClockUpdateService.class);
+        Intent intent = new Intent(context, ClockUpdateService.class); // TODO ne le démarrer que si l'écran est allumé
         intent.setPackage(context.getPackageName());
         context.startService(intent);
     }

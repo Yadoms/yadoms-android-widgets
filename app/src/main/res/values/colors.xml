@@ -5,4 +5,5 @@
     <color name="off">#68CCCCCC</color>
     <color name="yadomsOfficial">#428BCA</color>
     <color name="white">#FFFFFF</color>
+    <color name="warning">#FF0000</color>
 </resources>

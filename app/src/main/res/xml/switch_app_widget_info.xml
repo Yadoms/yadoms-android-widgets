@@ -4,7 +4,7 @@
                     android:initialLayout="@layout/switch_app_widget"
                     android:minWidth="40dp"
                     android:minHeight="40dp"
-                    android:previewImage="@mipmap/ic_baseline_toggle_off"
+                    android:previewImage="@mipmap/ic_baseline_toggle_on"
                     android:resizeMode="none"
                     android:widgetCategory="home_screen">
 </appwidget-provider>
