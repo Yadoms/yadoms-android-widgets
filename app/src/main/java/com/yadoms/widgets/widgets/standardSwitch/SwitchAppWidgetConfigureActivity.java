@@ -54,8 +54,7 @@ public class SwitchAppWidgetConfigureActivity
             // Save
             try
             {
-                DatabaseHelper databaseHelper = new DatabaseHelper(context);
-                databaseHelper.saveWidget(widget);
+                DatabaseHelper.saveWidget(context, widget);
             }
             catch (SQLException e)
             {
@@ -72,6 +71,8 @@ public class SwitchAppWidgetConfigureActivity
             Intent resultValue = new Intent();
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
+
+            ClockUpdateService.start(context);
 
             finish();
         }

@@ -2,13 +2,10 @@ package com.yadoms.widgets.widgets.standardSwitch;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,12 +14,10 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import com.yadoms.widgets.R;
 import com.yadoms.widgets.application.ConnectionStateMonitor;
 import com.yadoms.widgets.application.InvalidConfigurationException;
-import com.yadoms.widgets.application.WidgetsService;
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
 import com.yadoms.widgets.shared.ResourceHelper;
 import com.yadoms.widgets.shared.Widget;
@@ -36,10 +31,6 @@ import java.util.Arrays;
 
 import androidx.annotation.Nullable;
 
-/**
- * Implementation of App Widget functionality.
- * App Widget Configuration implemented in {@link SwitchAppWidgetConfigureActivity SwitchAppWidgetConfigureActivity}
- */
 public class SwitchAppWidget
         extends AppWidgetProvider
 {
@@ -52,54 +43,10 @@ public class SwitchAppWidget
 
     private static SparseBooleanArray currentState = new SparseBooleanArray();
 
-    private static DatabaseHelper DatabaseHelper;
     private static ConnectionStateMonitor connectionStateMonitor;
 
 
-    /**
-     * Inner class representing the update service.
-     */
-    public static class ClockUpdateService
-            extends Service
-    {
 
-        private final static IntentFilter intentFilter;
-
-        static
-        {
-            intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_TIME_TICK);
-        }
-
-        private final BroadcastReceiver clockChangedReceiver = new
-                BroadcastReceiver()
-                {
-                    public void onReceive(Context context,
-                                          Intent intent)
-                    {
-                        // Called every minute
-                        WidgetsService.refreshAll(context);
-                        Log.d(getClass().getSimpleName(), "onReceive");
-                    }
-                };
-
-        public IBinder onBind(Intent intent)
-        {
-            return null;
-        }
-
-        public void onCreate()
-        {
-            super.onCreate();
-            registerReceiver(clockChangedReceiver, intentFilter);
-        }
-
-        public void onDestroy()
-        {
-            super.onDestroy();
-            unregisterReceiver(clockChangedReceiver);
-        }
-    }
 
 
     public static void updateAppWidget(Context context,
@@ -137,24 +84,6 @@ public class SwitchAppWidget
         return returnedId;
     }
 
-    private static DatabaseHelper getDatabaseHelper(Context context)
-    {
-        if (DatabaseHelper == null)
-        {
-            try
-            {
-                DatabaseHelper = new DatabaseHelper(context);
-            }
-            catch (SQLException e)
-            {
-                Toast.makeText(context,
-                               context.getString(R.string.unable_to_access_configuration),
-                               Toast.LENGTH_LONG).show();
-            }
-        }
-        return DatabaseHelper;
-    }
-
     public RemoteViews buildRemoteView(Context context,
                                        int widgetId,
                                        boolean newValue)
@@ -164,7 +93,7 @@ public class SwitchAppWidget
         Widget widget;
         try
         {
-            widget = getDatabaseHelper(context).getWidget(widgetId);
+            widget = DatabaseHelper.getWidget(context, widgetId);
         }
         catch (InvalidConfigurationException e)
         {
@@ -224,12 +153,11 @@ public class SwitchAppWidget
                           int[] appWidgetIds)
     {
         // When the user deletes the widget, delete the preference associated with it.
-        DatabaseHelper databaseHelper = getDatabaseHelper(context);
         for (int appWidgetId : appWidgetIds)
         {
             try
             {
-                databaseHelper.deleteWidget(appWidgetId);
+                DatabaseHelper.deleteWidget(context, appWidgetId);
             }
             catch (SQLException e)
             {
@@ -247,11 +175,6 @@ public class SwitchAppWidget
         // Start network monitor service
         connectionStateMonitor = new ConnectionStateMonitor();
         connectionStateMonitor.enable(context);
-
-        // Start clock service
-        Intent intent = new Intent(context, ClockUpdateService.class); // TODO ne le démarrer que si l'écran est allumé
-        intent.setPackage(context.getPackageName());
-        context.startService(intent);
     }
 
     @Override
@@ -262,11 +185,6 @@ public class SwitchAppWidget
         // Stop network monitor service
         connectionStateMonitor.disable(context);
         connectionStateMonitor = null;
-
-        // Stop clock service
-        Intent intent = new Intent(context, ClockUpdateService.class);
-        intent.setPackage(context.getPackageName());
-        context.stopService(intent);
     }
 
     @Override
@@ -286,7 +204,7 @@ public class SwitchAppWidget
                 currentState.put(widgetId, newValue);
 
                 final Client yadomsRestClient = new Client(context.getApplicationContext());
-                final int keywordId = getDatabaseHelper(context).getWidget(widgetId).keywordId;
+                final int keywordId = DatabaseHelper.getWidget(context, widgetId).keywordId;
                 AsyncTask.execute(new Runnable()
                 {
                     @Override
@@ -356,14 +274,13 @@ public class SwitchAppWidget
                   "requestWidgetsState, widgetsId=" + Arrays.toString(widgetsId));
             try
             {
-                final DatabaseHelper databaseHelper = new DatabaseHelper(context);
                 Client yadomsRestClient = new Client(context);
 
                 // TODO optimiser en utilisant databaseHelper.getKeywords(widgetsId); et la requête getKeywordListLastData ?
 
                 for (final int widgetId : widgetsId)
                 {
-                    final Widget widget = databaseHelper.getWidget(widgetId);
+                    final Widget widget = DatabaseHelper.getWidget(context, widgetId);
 
                     yadomsRestClient.getKeywordLastValue(widget.keywordId, new GetResponseHandler()
                     {
@@ -385,11 +302,6 @@ public class SwitchAppWidget
                     });
                 }
 
-            }
-            catch (SQLException e)
-            {
-                Log.d(getClass().getSimpleName(), "Invalid configuration");
-                e.printStackTrace();
             }
             catch (InvalidConfigurationException e)
             {

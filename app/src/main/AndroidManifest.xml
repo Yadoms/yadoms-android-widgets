@@ -60,7 +60,7 @@
         </activity>
 
         <service android:name="com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget$SwitchAppWidgetUpdateService" />
-        <service android:name=".widgets.standardSwitch.SwitchAppWidget$ClockUpdateService" />
+        <service android:name=".widgets.standardSwitch.ClockUpdateService" />
     </application>
 
 </manifest>

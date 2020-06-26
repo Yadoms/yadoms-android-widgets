@@ -16,97 +16,175 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DatabaseHelper {
-    private final Dao<OrmLiteHelper.WidgetDto, Integer> widgetDao;
-
-    public DatabaseHelper(Context context) throws SQLException {
+public class DatabaseHelper
+{
+    private static Dao<OrmLiteHelper.WidgetDto, Integer> getWidgetDao(Context context) throws
+                                                                                       SQLException
+    {
         OrmLiteHelper ormLiteHelper = new OrmLiteHelper(context);
-        widgetDao = ormLiteHelper.getWidgetDao();
+        return ormLiteHelper.getWidgetDao();
     }
 
-    public void saveWidget(Widget widget) throws SQLException {
+    private static Dao<OrmLiteHelper.WidgetDto, Integer> getWidgetDaoNoThrow(Context context)
+    {
+        try
+        {
+            return getWidgetDao(context);
+        }
+        catch (SQLException e)
+        {
+            return null;
+        }
+    }
+
+    static public void saveWidget(Context context,
+                                  Widget widget) throws SQLException
+    {
+        Dao<OrmLiteHelper.WidgetDto, Integer> widgetDao = getWidgetDao(context);
         widgetDao.createOrUpdate(new OrmLiteHelper.WidgetDto(widget));
     }
 
-    public List<Widget> getAllWidgets() {
-        try {
+    static public List<Widget> getAllWidgets(Context context)
+    {
+        final Dao<OrmLiteHelper.WidgetDto, Integer> widgetDao = getWidgetDaoNoThrow(context);
+        if (widgetDao == null)
+        {
+            return Collections.emptyList();
+        }
+
+        try
+        {
             List<Widget> widgetList = new ArrayList<>();
-            for (OrmLiteHelper.WidgetDto widgetDto : widgetDao.queryForAll()) {
+            for (OrmLiteHelper.WidgetDto widgetDto : widgetDao.queryForAll())
+            {
                 widgetList.add(widgetDto.toWidget());
             }
             return widgetList;
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             return Collections.emptyList();
         }
     }
 
-    public int[] getAllWidgetIds() {
-        List<Widget> widgets = getAllWidgets();
+    static public int[] getAllWidgetIds(Context context)
+    {
+        List<Widget> widgets = getAllWidgets(context);
         int[] appWidgetIds = new int[widgets.size()];
         int i = 0;
-        for (Widget widget : widgets) {
+        for (Widget widget : widgets)
+        {
             appWidgetIds[i++] = widget.id;
         }
         return appWidgetIds;
     }
 
-    public Widget getWidget(int widgetId) throws InvalidConfigurationException {
-        try {
-            return widgetDao.queryForId(widgetId).toWidget();
-        } catch (Exception e) {
+    static public Widget getWidget(Context context,
+                                   int widgetId) throws InvalidConfigurationException
+    {
+        try
+        {
+            return getWidgetDao(context).queryForId(widgetId).toWidget();
+        }
+        catch (Exception e)
+        {
             throw new InvalidConfigurationException("Widget not found in database");
         }
     }
 
 
-    public void deleteWidget(int appWidgetId) throws SQLException {
-        widgetDao.deleteById(appWidgetId);
+    static public void deleteWidget(Context context,
+                                    int appWidgetId) throws SQLException
+    {
+        getWidgetDao(context).deleteById(appWidgetId);
     }
 
-    public Set<Integer> getKeywords(int[] widgetsId) {
-        try {
+    static public Set<Integer> getKeywords(Context context,
+                                           int[] widgetsId)
+    {
+        try
+        {
+            Dao<OrmLiteHelper.WidgetDto, Integer> widgetDao = getWidgetDaoNoThrow(context);
+            if (widgetDao == null)
+            {
+                return Collections.emptySet();
+            }
+
             //TODO nom de colonne en dur dans la requête, à corriger
             return new HashSet<>(widgetDao.queryRaw(
                     "select distinct " + OrmLiteHelper.WidgetDto.FIELD_KEYWORD_ID +
-                            " from " + OrmLiteHelper.WidgetDto.TABLE_NAME_WIDGETS +
-                            " where " + OrmLiteHelper.WidgetDto.FIELD_ID + " in (" + TextUtils.join(", ", Collections.singleton(widgetsId)) + ")",
-                    new RawRowMapper<Integer>() {
+                    " from " + OrmLiteHelper.WidgetDto.TABLE_NAME_WIDGETS +
+                    " where " + OrmLiteHelper.WidgetDto.FIELD_ID + " in (" + TextUtils.join(", ",
+                                                                                            Collections
+                                                                                                    .singleton(
+                                                                                                            widgetsId)) + ")",
+                    new RawRowMapper<Integer>()
+                    {
                         @Override
-                        public Integer mapRow(String[] columnNames, String[] resultColumns) {
+                        public Integer mapRow(String[] columnNames,
+                                              String[] resultColumns)
+                        {
                             return Integer.parseInt(resultColumns[0]);
                         }
                     }).getResults());
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             return Collections.emptySet();
         }
     }
 
 
-    public Set<Integer> getAllKeywords() {
-        try {
+    static public Set<Integer> getAllKeywords(Context context)
+    {
+        try
+        {
+            Dao<OrmLiteHelper.WidgetDto, Integer> widgetDao = getWidgetDaoNoThrow(context);
+            if (widgetDao == null)
+            {
+                return Collections.emptySet();
+            }
+
             //TODO nom de colonne en dur dans la requête, à corriger
             return new HashSet<>(widgetDao.queryRaw(
                     "select distinct " + OrmLiteHelper.WidgetDto.FIELD_KEYWORD_ID + " from " + OrmLiteHelper.WidgetDto.TABLE_NAME_WIDGETS,
-                    new RawRowMapper<Integer>() {
+                    new RawRowMapper<Integer>()
+                    {
                         @Override
-                        public Integer mapRow(String[] columnNames, String[] resultColumns) {
+                        public Integer mapRow(String[] columnNames,
+                                              String[] resultColumns)
+                        {
                             return Integer.parseInt(resultColumns[0]);
                         }
                     }).getResults());
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             return Collections.emptySet();
         }
     }
 
-    public Set<Widget> getWidgetsFromKeyword(int keywordId) {
-        try {
-            List<OrmLiteHelper.WidgetDto> widgets = widgetDao.queryForEq(OrmLiteHelper.WidgetDto.FIELD_KEYWORD_ID, keywordId);
+    static public Set<Widget> getWidgetsFromKeyword(Context context, int keywordId)
+    {
+        try
+        {
+            Dao<OrmLiteHelper.WidgetDto, Integer> widgetDao = getWidgetDaoNoThrow(context);
+            if (widgetDao == null)
+            {
+                return Collections.emptySet();
+            }
+
+            List<OrmLiteHelper.WidgetDto> widgets = widgetDao.queryForEq(OrmLiteHelper.WidgetDto.FIELD_KEYWORD_ID,
+                                                                         keywordId);
             HashSet<Widget> set = new HashSet<>();
-            for (OrmLiteHelper.WidgetDto widget : widgets) {
+            for (OrmLiteHelper.WidgetDto widget : widgets)
+            {
                 set.add(widget.toWidget());
             }
             return set;
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             return Collections.emptySet();
         }
     }
