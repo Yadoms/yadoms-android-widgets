@@ -183,7 +183,7 @@ public class SwitchAppWidget
         // Last widget is disabled
 
         // Stop network monitor service
-        connectionStateMonitor.disable(context);
+        connectionStateMonitor.disable(context); //TODO faire crasher, connectionStateMonitor est null
         connectionStateMonitor = null;
     }
 
