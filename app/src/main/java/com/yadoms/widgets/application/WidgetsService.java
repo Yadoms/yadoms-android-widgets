@@ -5,7 +5,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.yadoms.widgets.application.preferences.DatabaseHelper;
-import com.yadoms.widgets.widgets.standardSwitch.ClockUpdateService;
 import com.yadoms.widgets.widgets.standardSwitch.SwitchAppWidget;
 
 public class WidgetsService {
@@ -18,17 +17,12 @@ public class WidgetsService {
     {
         // Manage
         Log.d(WidgetsService.class.getSimpleName(), "onSreenOn");
-
-        // Start clock service
-        if (DatabaseHelper.getAllWidgetIds(context).length != 0)
-            ClockUpdateService.start(context);
+        refreshAll(context);
     }
 
     static void onSreenOff(Context context)
     {
         Log.d(WidgetsService.class.getSimpleName(), "onSreenOff");
-
-        // Stop clock service
-        ClockUpdateService.stop(context);
+        refreshAll(context);
     }
 }

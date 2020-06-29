@@ -72,8 +72,6 @@ public class SwitchAppWidgetConfigureActivity
             resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             setResult(RESULT_OK, resultValue);
 
-            ClockUpdateService.start(context);
-
             finish();
         }
     };
