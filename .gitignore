@@ -11,3 +11,4 @@
 *.orig
 local.properties
 .idea
+/.idea/
